@@ -1,6 +1,6 @@
 # study-kanren
 
-###### An implementation of miniKanren in Common Lisp
+An implementation of miniKanren in Common Lisp
 
 ### Usage
 
