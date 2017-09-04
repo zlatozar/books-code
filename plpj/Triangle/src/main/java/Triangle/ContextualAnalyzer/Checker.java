@@ -38,9 +38,9 @@ import Triangle.SyntacticAnalyzer.SourcePosition;
 public final class Checker implements Visitor {
 
     // Always returns null. Does not use the given object.
-    private static final SourcePosition dummyPos = new SourcePosition();
+    private static final SourcePosition dummySrcPos = new SourcePosition();
 
-    private static final Identifier dummyI = new Identifier("", dummyPos);
+    private static final Identifier dummyIdent = new Identifier("", dummySrcPos);
 
     private final IdentificationTable indTable;
     private final ErrorReporter reporter;
@@ -991,7 +991,7 @@ public final class Checker implements Visitor {
 
         TypeDeclaration binding;
 
-        binding = new TypeDeclaration(new Identifier(name, dummyPos), typedenoter, dummyPos);
+        binding = new TypeDeclaration(new Identifier(name, dummySrcPos), typedenoter, dummySrcPos);
         indTable.enter(name, binding);
 
         return binding;
@@ -1003,10 +1003,10 @@ public final class Checker implements Visitor {
         ConstDeclaration binding;
 
         // constExpr used only as a placeholder for constType
-        constExpr = new IntegerExpression(null, dummyPos);
+        constExpr = new IntegerExpression(null, dummySrcPos);
         constExpr.type = constType;
 
-        binding = new ConstDeclaration(new Identifier(name, dummyPos), constExpr, dummyPos);
+        binding = new ConstDeclaration(new Identifier(name, dummySrcPos), constExpr, dummySrcPos);
 
         indTable.enter(name, binding);
 
@@ -1017,7 +1017,7 @@ public final class Checker implements Visitor {
 
         ProcDeclaration binding;
 
-        binding = new ProcDeclaration(new Identifier(name, dummyPos), fps, new EmptyCommand(dummyPos), dummyPos);
+        binding = new ProcDeclaration(new Identifier(name, dummySrcPos), fps, new EmptyCommand(dummySrcPos), dummySrcPos);
 
         indTable.enter(name, binding);
         return binding;
@@ -1028,7 +1028,7 @@ public final class Checker implements Visitor {
 
         FuncDeclaration binding;
 
-        binding = new FuncDeclaration(new Identifier(name, dummyPos), fps, resultType, new EmptyExpression(dummyPos), dummyPos);
+        binding = new FuncDeclaration(new Identifier(name, dummySrcPos), fps, resultType, new EmptyExpression(dummySrcPos), dummySrcPos);
         indTable.enter(name, binding);
 
         return binding;
@@ -1038,7 +1038,7 @@ public final class Checker implements Visitor {
 
         UnaryOperatorDeclaration binding;
 
-        binding = new UnaryOperatorDeclaration(new Operator(op, dummyPos), argType, resultType, dummyPos);
+        binding = new UnaryOperatorDeclaration(new Operator(op, dummySrcPos), argType, resultType, dummySrcPos);
         indTable.enter(op, binding);
 
         return binding;
@@ -1049,7 +1049,7 @@ public final class Checker implements Visitor {
 
         BinaryOperatorDeclaration binding;
 
-        binding = new BinaryOperatorDeclaration(new Operator(op, dummyPos), arg1Type, arg2type, resultType, dummyPos);
+        binding = new BinaryOperatorDeclaration(new Operator(op, dummySrcPos), arg1Type, arg2type, resultType, dummySrcPos);
         indTable.enter(op, binding);
 
         return binding;
@@ -1058,11 +1058,11 @@ public final class Checker implements Visitor {
     private void establishStdEnvironment() {
 
         // idTable.startIdentification();
-        StdEnvironment.booleanType = new BoolTypeDenoter(dummyPos);
-        StdEnvironment.integerType = new IntTypeDenoter(dummyPos);
-        StdEnvironment.charType = new CharTypeDenoter(dummyPos);
-        StdEnvironment.anyType = new AnyTypeDenoter(dummyPos);
-        StdEnvironment.errorType = new ErrorTypeDenoter(dummyPos);
+        StdEnvironment.booleanType = new BoolTypeDenoter(dummySrcPos);
+        StdEnvironment.integerType = new IntTypeDenoter(dummySrcPos);
+        StdEnvironment.charType = new CharTypeDenoter(dummySrcPos);
+        StdEnvironment.anyType = new AnyTypeDenoter(dummySrcPos);
+        StdEnvironment.errorType = new ErrorTypeDenoter(dummySrcPos);
 
         StdEnvironment.booleanDecl = declareStdType("Boolean", StdEnvironment.booleanType);
         StdEnvironment.falseDecl = declareStdConst("false", StdEnvironment.booleanType);
@@ -1084,16 +1084,16 @@ public final class Checker implements Visitor {
         StdEnvironment.notlessDecl = declareStdBinaryOp(">=", StdEnvironment.integerType, StdEnvironment.integerType, StdEnvironment.booleanType);
 
         StdEnvironment.charDecl = declareStdType("Char", StdEnvironment.charType);
-        StdEnvironment.chrDecl = declareStdFunc("chr", new SingleFormalParameterSequence(new ConstFormalParameter(dummyI, StdEnvironment.integerType, dummyPos), dummyPos), StdEnvironment.charType);
-        StdEnvironment.ordDecl = declareStdFunc("ord", new SingleFormalParameterSequence(new ConstFormalParameter(dummyI, StdEnvironment.charType, dummyPos), dummyPos), StdEnvironment.integerType);
-        StdEnvironment.eofDecl = declareStdFunc("eof", new EmptyFormalParameterSequence(dummyPos), StdEnvironment.booleanType);
-        StdEnvironment.eolDecl = declareStdFunc("eol", new EmptyFormalParameterSequence(dummyPos), StdEnvironment.booleanType);
-        StdEnvironment.getDecl = declareStdProc("get", new SingleFormalParameterSequence(new VarFormalParameter(dummyI, StdEnvironment.charType, dummyPos), dummyPos));
-        StdEnvironment.putDecl = declareStdProc("put", new SingleFormalParameterSequence(new ConstFormalParameter(dummyI, StdEnvironment.charType, dummyPos), dummyPos));
-        StdEnvironment.getintDecl = declareStdProc("getint", new SingleFormalParameterSequence(new VarFormalParameter(dummyI, StdEnvironment.integerType, dummyPos), dummyPos));
-        StdEnvironment.putintDecl = declareStdProc("putint", new SingleFormalParameterSequence(new ConstFormalParameter(dummyI, StdEnvironment.integerType, dummyPos), dummyPos));
-        StdEnvironment.geteolDecl = declareStdProc("geteol", new EmptyFormalParameterSequence(dummyPos));
-        StdEnvironment.puteolDecl = declareStdProc("puteol", new EmptyFormalParameterSequence(dummyPos));
+        StdEnvironment.chrDecl = declareStdFunc("chr", new SingleFormalParameterSequence(new ConstFormalParameter(dummyIdent, StdEnvironment.integerType, dummySrcPos), dummySrcPos), StdEnvironment.charType);
+        StdEnvironment.ordDecl = declareStdFunc("ord", new SingleFormalParameterSequence(new ConstFormalParameter(dummyIdent, StdEnvironment.charType, dummySrcPos), dummySrcPos), StdEnvironment.integerType);
+        StdEnvironment.eofDecl = declareStdFunc("eof", new EmptyFormalParameterSequence(dummySrcPos), StdEnvironment.booleanType);
+        StdEnvironment.eolDecl = declareStdFunc("eol", new EmptyFormalParameterSequence(dummySrcPos), StdEnvironment.booleanType);
+        StdEnvironment.getDecl = declareStdProc("get", new SingleFormalParameterSequence(new VarFormalParameter(dummyIdent, StdEnvironment.charType, dummySrcPos), dummySrcPos));
+        StdEnvironment.putDecl = declareStdProc("put", new SingleFormalParameterSequence(new ConstFormalParameter(dummyIdent, StdEnvironment.charType, dummySrcPos), dummySrcPos));
+        StdEnvironment.getintDecl = declareStdProc("getint", new SingleFormalParameterSequence(new VarFormalParameter(dummyIdent, StdEnvironment.integerType, dummySrcPos), dummySrcPos));
+        StdEnvironment.putintDecl = declareStdProc("putint", new SingleFormalParameterSequence(new ConstFormalParameter(dummyIdent, StdEnvironment.integerType, dummySrcPos), dummySrcPos));
+        StdEnvironment.geteolDecl = declareStdProc("geteol", new EmptyFormalParameterSequence(dummySrcPos));
+        StdEnvironment.puteolDecl = declareStdProc("puteol", new EmptyFormalParameterSequence(dummySrcPos));
         StdEnvironment.equalDecl = declareStdBinaryOp("=", StdEnvironment.anyType, StdEnvironment.anyType, StdEnvironment.booleanType);
         StdEnvironment.unequalDecl = declareStdBinaryOp("\\=", StdEnvironment.anyType, StdEnvironment.anyType, StdEnvironment.booleanType);
 
