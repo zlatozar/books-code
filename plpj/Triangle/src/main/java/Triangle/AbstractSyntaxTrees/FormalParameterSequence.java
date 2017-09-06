@@ -16,6 +16,10 @@ package Triangle.AbstractSyntaxTrees;
 
 import Triangle.SyntacticAnalyzer.SourcePosition;
 
+/**
+ * Note that 'equal' method is required because we have to
+ * compare parameters(type and order) during func/proc call
+ */
 public abstract class FormalParameterSequence extends AST {
 
     public FormalParameterSequence(SourcePosition thePosition) {

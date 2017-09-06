@@ -18,7 +18,10 @@ import Triangle.SyntacticAnalyzer.SourcePosition;
 
 public class MultipleActualParameterSequence extends ActualParameterSequence {
 
+    // first
     public ActualParameter AP;
+
+    // rest
     public ActualParameterSequence APS;
 
     public MultipleActualParameterSequence(ActualParameter apAST, ActualParameterSequence apsAST,

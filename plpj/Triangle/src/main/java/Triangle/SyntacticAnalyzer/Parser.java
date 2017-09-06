@@ -846,7 +846,6 @@ public class Parser {
         return formalAST;
     }
 
-
     ActualParameterSequence parseActualParameterSequence() throws SyntaxError {
         ActualParameterSequence actualsAST;
 
@@ -887,6 +886,7 @@ public class Parser {
             finish(actualsPos);
             actualsAST = new SingleActualParameterSequence(apAST, actualsPos);
         }
+
         return actualsAST;
     }
 

@@ -109,6 +109,8 @@ public final class Checker implements Visitor {
         if (binding == null) {
             reportUndeclared(callCommand.I);
 
+        // Visit APS as pass FPS. In this way we can compare them and decide if call is with correct parameters
+
         } else if (binding instanceof ProcDeclaration) {
             callCommand.APS.visit(this, ((ProcDeclaration) binding).FPS);
 
@@ -116,8 +118,7 @@ public final class Checker implements Visitor {
             callCommand.APS.visit(this, ((ProcFormalParameter) binding).FPS);
 
         } else {
-            reporter.reportError("\"%\" is not a procedure identifier",
-                    callCommand.I.spelling, callCommand.I.position);
+            reporter.reportError("\"%\" is not a procedure identifier", callCommand.I.spelling, callCommand.I.position);
         }
 
         return null;
@@ -377,6 +378,7 @@ public final class Checker implements Visitor {
         // eliminate type identifiers
         funcDeclaration.T = (TypeDenoter) funcDeclaration.T.visit(this, null);
 
+        // note that function name should be visible in enclosing scope
         indTable.enter(funcDeclaration.I.spelling, funcDeclaration);
 
         if (funcDeclaration.duplicated) {
@@ -621,8 +623,10 @@ public final class Checker implements Visitor {
 
     public Object visitFuncActualParameter(FuncActualParameter funcActualParam, Object formalParameter) {
 
+        // Used passed formal parameters - should be compared to actual
         FormalParameter fp = (FormalParameter) formalParameter;
 
+        // Using function name in (function) call we find the declaration
         Declaration binding = (Declaration) funcActualParam.I.visit(this, null);
 
         if (binding == null) {
@@ -727,10 +731,21 @@ public final class Checker implements Visitor {
         return null;
     }
 
+    // see visitCallCommand
     public Object visitMultipleActualParameterSequence(MultipleActualParameterSequence multiActualParamSeq, Object formalParameterSeq) {
 
         // use passed FormalParameterSequence
         FormalParameterSequence fps = (FormalParameterSequence) formalParameterSeq;
+
+        // Why this is the condition for 'too many params'?
+
+        /*
+         * We equally select from APS and FPS.
+         *
+         * If we enter visitMultipleActualParameterSequence it means that actual
+         * parameters are MultipleActualParameterSequence so formal parameters must be
+         * MultipleFormalParameterSequence.
+         */
 
         if (!(fps instanceof MultipleFormalParameterSequence)) {
             reporter.reportError("too many actual parameters", "", multiActualParamSeq.position);
@@ -743,10 +758,13 @@ public final class Checker implements Visitor {
         return null;
     }
 
+    // see visitCallCommand
     public Object visitSingleActualParameterSequence(SingleActualParameterSequence singleActualParamSeq, Object formalParameterSeq) {
 
-        // use passed FormalParameterSequence
+        // use passed FormalParameterSequence because it should be compared to ActualParameterSequence
         FormalParameterSequence fps = (FormalParameterSequence) formalParameterSeq;
+
+        // Why this is the condition for 'not enough params'? See visitMultipleActualParameterSequence
 
         if (!(fps instanceof SingleFormalParameterSequence)) {
             reporter.reportError("incorrect number of actual parameters", "", singleActualParamSeq.position);
