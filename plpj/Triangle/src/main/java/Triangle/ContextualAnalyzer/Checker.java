@@ -883,7 +883,9 @@ public final class Checker implements Visitor {
     }
 
     public Object visitOperator(Operator O, Object _) {
-        // Binary or Unary Operators could be declared above
+
+        // Binary or Unary Operators could be declared above that's why we search indTable.
+        // Do not forget to check standard functions.
         Declaration binding = indTable.retrieve(O.spelling);
 
         if (binding != null) {
