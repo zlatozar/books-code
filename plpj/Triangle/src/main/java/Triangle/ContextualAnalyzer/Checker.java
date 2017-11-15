@@ -751,7 +751,10 @@ public final class Checker implements Visitor {
             reporter.reportError("too many actual parameters", "", multiActualParamSeq.position);
 
         } else {
+
             multiActualParamSeq.AP.visit(this, ((MultipleFormalParameterSequence) fps).FP);
+
+            // equally reduce APS and FPS
             multiActualParamSeq.APS.visit(this, ((MultipleFormalParameterSequence) fps).FPS);
         }
 

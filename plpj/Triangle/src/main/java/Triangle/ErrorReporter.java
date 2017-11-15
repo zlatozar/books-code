@@ -16,6 +16,9 @@ package Triangle;
 
 import Triangle.SyntacticAnalyzer.SourcePosition;
 
+/**
+ * Reports error but do not stop the execution.
+ */
 public class ErrorReporter {
 
     int numErrors;
