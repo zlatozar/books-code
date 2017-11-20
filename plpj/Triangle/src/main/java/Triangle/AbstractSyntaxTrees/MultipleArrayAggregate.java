@@ -24,6 +24,8 @@ import Triangle.SyntacticAnalyzer.SourcePosition;
 public class MultipleArrayAggregate extends ArrayAggregate {
 
     public Expression E;
+
+    // rest
     public ArrayAggregate AA;
 
     public MultipleArrayAggregate(Expression eAST, ArrayAggregate aaAST, SourcePosition thePosition) {

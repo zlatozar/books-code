@@ -621,6 +621,7 @@ public final class Checker implements Visitor {
         return null;
     }
 
+    // call to function with parameters
     public Object visitFuncActualParameter(FuncActualParameter funcActualParam, Object formalParameter) {
 
         // Used passed formal parameters - should be compared to actual
@@ -1084,18 +1085,25 @@ public final class Checker implements Visitor {
         StdEnvironment.booleanType = new BoolTypeDenoter(dummySrcPos);
         StdEnvironment.integerType = new IntTypeDenoter(dummySrcPos);
         StdEnvironment.charType = new CharTypeDenoter(dummySrcPos);
+
         StdEnvironment.anyType = new AnyTypeDenoter(dummySrcPos);
         StdEnvironment.errorType = new ErrorTypeDenoter(dummySrcPos);
 
+        // Key should be unique. Limitation: you can't define function with different kind of parameters.
+        // One possible (partial) solution is to add arity but also parser should be changed.
+
         StdEnvironment.booleanDecl = declareStdType("Boolean", StdEnvironment.booleanType);
+        StdEnvironment.charDecl = declareStdType("Char", StdEnvironment.charType);
+        StdEnvironment.integerDecl = declareStdType("Integer", StdEnvironment.integerType);
+
         StdEnvironment.falseDecl = declareStdConst("false", StdEnvironment.booleanType);
         StdEnvironment.trueDecl = declareStdConst("true", StdEnvironment.booleanType);
+        StdEnvironment.maxintDecl = declareStdConst("maxint", StdEnvironment.integerType);
+
         StdEnvironment.notDecl = declareStdUnaryOp("\\", StdEnvironment.booleanType, StdEnvironment.booleanType);
+
         StdEnvironment.andDecl = declareStdBinaryOp("/\\", StdEnvironment.booleanType, StdEnvironment.booleanType, StdEnvironment.booleanType);
         StdEnvironment.orDecl = declareStdBinaryOp("\\/", StdEnvironment.booleanType, StdEnvironment.booleanType, StdEnvironment.booleanType);
-
-        StdEnvironment.integerDecl = declareStdType("Integer", StdEnvironment.integerType);
-        StdEnvironment.maxintDecl = declareStdConst("maxint", StdEnvironment.integerType);
         StdEnvironment.addDecl = declareStdBinaryOp("+", StdEnvironment.integerType, StdEnvironment.integerType, StdEnvironment.integerType);
         StdEnvironment.subtractDecl = declareStdBinaryOp("-", StdEnvironment.integerType, StdEnvironment.integerType, StdEnvironment.integerType);
         StdEnvironment.multiplyDecl = declareStdBinaryOp("*", StdEnvironment.integerType, StdEnvironment.integerType, StdEnvironment.integerType);
@@ -1105,20 +1113,20 @@ public final class Checker implements Visitor {
         StdEnvironment.notgreaterDecl = declareStdBinaryOp("<=", StdEnvironment.integerType, StdEnvironment.integerType, StdEnvironment.booleanType);
         StdEnvironment.greaterDecl = declareStdBinaryOp(">", StdEnvironment.integerType, StdEnvironment.integerType, StdEnvironment.booleanType);
         StdEnvironment.notlessDecl = declareStdBinaryOp(">=", StdEnvironment.integerType, StdEnvironment.integerType, StdEnvironment.booleanType);
+        StdEnvironment.equalDecl = declareStdBinaryOp("=", StdEnvironment.anyType, StdEnvironment.anyType, StdEnvironment.booleanType);
+        StdEnvironment.unequalDecl = declareStdBinaryOp("\\=", StdEnvironment.anyType, StdEnvironment.anyType, StdEnvironment.booleanType);
 
-        StdEnvironment.charDecl = declareStdType("Char", StdEnvironment.charType);
         StdEnvironment.chrDecl = declareStdFunc("chr", new SingleFormalParameterSequence(new ConstFormalParameter(dummyIdent, StdEnvironment.integerType, dummySrcPos), dummySrcPos), StdEnvironment.charType);
         StdEnvironment.ordDecl = declareStdFunc("ord", new SingleFormalParameterSequence(new ConstFormalParameter(dummyIdent, StdEnvironment.charType, dummySrcPos), dummySrcPos), StdEnvironment.integerType);
         StdEnvironment.eofDecl = declareStdFunc("eof", new EmptyFormalParameterSequence(dummySrcPos), StdEnvironment.booleanType);
         StdEnvironment.eolDecl = declareStdFunc("eol", new EmptyFormalParameterSequence(dummySrcPos), StdEnvironment.booleanType);
+
         StdEnvironment.getDecl = declareStdProc("get", new SingleFormalParameterSequence(new VarFormalParameter(dummyIdent, StdEnvironment.charType, dummySrcPos), dummySrcPos));
         StdEnvironment.putDecl = declareStdProc("put", new SingleFormalParameterSequence(new ConstFormalParameter(dummyIdent, StdEnvironment.charType, dummySrcPos), dummySrcPos));
         StdEnvironment.getintDecl = declareStdProc("getint", new SingleFormalParameterSequence(new VarFormalParameter(dummyIdent, StdEnvironment.integerType, dummySrcPos), dummySrcPos));
         StdEnvironment.putintDecl = declareStdProc("putint", new SingleFormalParameterSequence(new ConstFormalParameter(dummyIdent, StdEnvironment.integerType, dummySrcPos), dummySrcPos));
         StdEnvironment.geteolDecl = declareStdProc("geteol", new EmptyFormalParameterSequence(dummySrcPos));
         StdEnvironment.puteolDecl = declareStdProc("puteol", new EmptyFormalParameterSequence(dummySrcPos));
-        StdEnvironment.equalDecl = declareStdBinaryOp("=", StdEnvironment.anyType, StdEnvironment.anyType, StdEnvironment.booleanType);
-        StdEnvironment.unequalDecl = declareStdBinaryOp("\\=", StdEnvironment.anyType, StdEnvironment.anyType, StdEnvironment.booleanType);
 
     }
 }

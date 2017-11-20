@@ -16,8 +16,8 @@ package Triangle.AbstractSyntaxTrees;
 
 import Triangle.SyntacticAnalyzer.SourcePosition;
 
-// NOTE that some common characteristics are in abstract class e.g. in Expression - type, Declaration - duplication etc.
-// Here is the 'type'
+// NOTE that some common characteristics are in abstract class
+// e.g. in Expression - type, Declaration - duplication etc. here is the 'type'
 public abstract class RecordAggregate extends AST {
 
     public FieldTypeDenoter type;

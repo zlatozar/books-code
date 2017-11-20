@@ -16,15 +16,21 @@ package Triangle.AbstractSyntaxTrees;
 
 import Triangle.SyntacticAnalyzer.SourcePosition;
 
+/**
+ * Describes function with it's formal parameters
+ */
 public class FuncFormalParameter extends FormalParameter {
 
+    // function name
     public Identifier I;
+
+    // parameters
     public FormalParameterSequence FPS;
+
+    // function type
     public TypeDenoter T;
 
-    public FuncFormalParameter(Identifier iAST, FormalParameterSequence fpsAST, TypeDenoter tAST,
-                               SourcePosition thePosition) {
-
+    public FuncFormalParameter(Identifier iAST, FormalParameterSequence fpsAST, TypeDenoter tAST, SourcePosition thePosition) {
         super(thePosition);
 
         this.I = iAST;

@@ -19,7 +19,7 @@ single-Command ::= V-name := Expression
 This production rule can be left-factorized as follows:
 
 ```
-single-Command ::= V-name : = Expression
+single-Command ::= V-name := Expression
                 | if Expression then single-Command
                      (<empty> | else single-Command)
 ```                     

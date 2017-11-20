@@ -19,12 +19,15 @@ import Triangle.SyntacticAnalyzer.SourcePosition;
 public class MultipleFieldTypeDenoter extends FieldTypeDenoter {
 
     // all are used in equality
+
+    // first (I, T)
     public Identifier I;
     public TypeDenoter T;
+
+    // rest (I, T)
     public FieldTypeDenoter FT;
 
-    public MultipleFieldTypeDenoter(Identifier iAST, TypeDenoter tAST, FieldTypeDenoter ftAST,
-                                    SourcePosition thePosition) {
+    public MultipleFieldTypeDenoter(Identifier iAST, TypeDenoter tAST, FieldTypeDenoter ftAST, SourcePosition thePosition) {
         super(thePosition);
 
         this.I = iAST;

@@ -5,6 +5,10 @@ let
          content: array 80 of Char
       end;
 
+   ! check functions declaration (not used)
+   func odd (n: Integer) : Boolean ~
+      (n // 2) \= 0;
+
    proc getline (var l: Line) ~
       begin
          l.length := 0;

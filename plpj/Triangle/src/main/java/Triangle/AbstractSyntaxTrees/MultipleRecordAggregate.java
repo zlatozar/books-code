@@ -18,9 +18,11 @@ import Triangle.SyntacticAnalyzer.SourcePosition;
 
 public class MultipleRecordAggregate extends RecordAggregate {
 
+    // first (I, E)
     public Identifier I;
-
     public Expression E;
+
+    // rest (I, E)
     public RecordAggregate RA;
 
     public MultipleRecordAggregate(Identifier iAST, Expression eAST, RecordAggregate raAST, SourcePosition thePosition) {

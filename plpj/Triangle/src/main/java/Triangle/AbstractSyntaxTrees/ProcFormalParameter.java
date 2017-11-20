@@ -16,6 +16,9 @@ package Triangle.AbstractSyntaxTrees;
 
 import Triangle.SyntacticAnalyzer.SourcePosition;
 
+/**
+ * Describes procedure with it's formal parameters. Do not have return type
+ */
 public class ProcFormalParameter extends FormalParameter {
 
     public Identifier I;
