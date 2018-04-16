@@ -16,6 +16,9 @@ log/
 *.iml
 *.iws
 
+# Visual Studio
+.vs/
+
 # Ignore compiled lisp
 *.FASL
 *.fasl
