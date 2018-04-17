@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="01_Building_Blocks.fs" />
+    <Compile Include="02_MatchmakerMatchMaker.fs" />
+    <Compile Include="03_ConsIsStillMAgnificent.fs" />
+    <Compile Include="04_LookToTheStars.fs" />
+    <Compile Include="05_CouplesAreMagnificentToo.fs" />
+    <Compile Include="06_ItsFullOfStars.fs" />
+    <Compile Include="07_FunctionsArePeopleToo.fs" />
+    <Compile Include="08_BowsAndArrows.fs" />
+    <Compile Include="09_OhNo.fs" />
+    <Compile Include="10_BuildingOnBlocks.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.Portable.Compatibility" Version="1.0.1" />
+  </ItemGroup>
+  
+</Project>

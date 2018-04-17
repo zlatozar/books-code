@@ -1,0 +1,6 @@
+[Bb]in/
+[Oo]bj/
+*.suo
+packages/
+.paket/paket.exe
+.vs/
