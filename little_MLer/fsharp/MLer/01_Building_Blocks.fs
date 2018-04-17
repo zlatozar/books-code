@@ -9,12 +9,6 @@ module ch01
         | Zero 
         | One_more_than of num
 
-    // 'ignore' disables warning
-    One_more_than
-      (One_more_than
-         (One_more_than
-            (One_more_than(Zero)))) |> ignore
-
     // NOTE:   
     //
     // What is an element of this new type? It is Zero!
@@ -24,9 +18,25 @@ module ch01
     //
     // Zero(One_more_than (Zero))  // an error
 
-    type 'a open_faced_sandwich =
-      | Bread of 'a
-      | Slice of 'a open_faced_sandwich
+    // 'ignore' disables compiler warning
+    One_more_than(
+        One_more_than(
+            One_more_than(
+                One_more_than(Zero)))) |> ignore
+   
+
+    type open_faced_sandwich<'a> =
+        | Bread of 'a
+        | Slice of open_faced_sandwich<'a>
+
+    // Types are types
+    Bread(
+        Bread(
+            One_more_than(Zero))) |> ignore
+
+    // Slice(
+    //     Slice(
+    //        One_more_than(Zero))) // an error
 
     // ATTENTION: Everything that you use for definition should be defined before that.
 
