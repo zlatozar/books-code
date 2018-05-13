@@ -19,6 +19,9 @@ log/
 # Visual Studio
 .vs/
 
+# Paket
+paket-files
+
 # Ignore compiled lisp
 *.FASL
 *.fasl

@@ -69,7 +69,7 @@ module ch10
     
         let numberAsNum = {
             new N<Num> with
-                member succ n =
+                member this.succ n =
                     OneMoreThan n
             
                 member this.isZero n =

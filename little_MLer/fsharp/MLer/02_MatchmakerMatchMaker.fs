@@ -1,5 +1,7 @@
 module ch02
 
+    // Code convention: Type should start with upper case
+
     type ShishKebab =
         | Skewer
         | Onion of ShishKebab
