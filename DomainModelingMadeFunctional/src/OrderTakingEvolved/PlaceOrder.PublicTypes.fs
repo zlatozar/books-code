@@ -111,12 +111,8 @@ type PlaceOrderError =
     | Pricing of PricingError 
     | RemoteService of RemoteServiceError 
 
-
 //_________________________________________________________________________
 //                                                     the workflow itself
 
 type PlaceOrder = 
     UnvalidatedOrder -> AsyncResult<PlaceOrderEvent list,PlaceOrderError>
-
-
-

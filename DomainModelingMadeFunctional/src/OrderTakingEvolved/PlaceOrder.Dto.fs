@@ -394,6 +394,3 @@ module internal PlaceOrderErrorDto =
                 Code = "RemoteServiceError"
                 Message = msg
             }
-
-
-

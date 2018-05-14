@@ -2,8 +2,6 @@
 // rather than a module at the top level
 namespace OrderTaking.Common  
 
-open System
-
 // ==================================
 // Common compound types used throughout the OrderTaking domain
 //

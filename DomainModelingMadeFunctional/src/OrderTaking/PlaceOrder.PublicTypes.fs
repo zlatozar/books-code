@@ -51,7 +51,6 @@ type OrderAcknowledgmentSent = {
     EmailAddress : EmailAddress 
     }
 
-
 // priced state            
 type PricedOrderLine = {
     OrderLineId : OrderLineId 
@@ -87,11 +86,8 @@ type PlaceOrderEvent =
     | BillableOrderPlaced of BillableOrderPlaced 
     | AcknowledgmentSent  of OrderAcknowledgmentSent
 
-
-
-// ------------------------------------
-// error outputs 
-
+//_____________________________________________________________________________
+//                                                               error outputs 
 
 /// All the things that can go wrong in this workflow
 type ValidationError = ValidationError of string
@@ -114,8 +110,8 @@ type PlaceOrderError =
     | RemoteService of RemoteServiceError 
 
 
-// ------------------------------------
-// the workflow itself
+//_____________________________________________________________________________
+//                                                         the workflow itself
 
 type PlaceOrder = 
     UnvalidatedOrder -> AsyncResult<PlaceOrderEvent list,PlaceOrderError>

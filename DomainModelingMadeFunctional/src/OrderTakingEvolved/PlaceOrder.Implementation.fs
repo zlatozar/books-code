@@ -14,7 +14,6 @@ open OrderTaking.PlaceOrder.InternalTypes
 //   and the implementation of the overall workflow
 // ======================================================
 
-
 // ======================================================
 // Section 2 : Implementation
 // ======================================================
@@ -369,7 +368,6 @@ let makeShipmentLine (line: PricedOrderLine) : ShippableOrderLine option =
         } |> Some
     | CommentLine _ ->
         None
-
 
 let createShippingEvent (placedOrder:PricedOrder) : ShippableOrderPlaced =
     {

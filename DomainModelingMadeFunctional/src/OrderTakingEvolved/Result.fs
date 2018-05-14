@@ -1,7 +1,5 @@
 ﻿namespace global  // note use of GLOBAL namespace
 
-open System
-
 //==============================================
 // Helpers for Result type and AsyncResult type
 //==============================================

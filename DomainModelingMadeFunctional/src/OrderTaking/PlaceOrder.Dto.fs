@@ -15,7 +15,6 @@ open OrderTaking.Common
 //
 // ======================================================
 
-
 // ==================================
 // DTOs for PlaceOrder workflow
 // ==================================
@@ -152,7 +151,6 @@ module internal AddressDto =
         ZipCode = domainObj.ZipCode |> ZipCode.value
         }
 
-
 //===============================================
 // DTOs for OrderLines
 //===============================================
@@ -177,7 +175,6 @@ module internal OrderLineDto =
         ProductCode = dto.ProductCode 
         Quantity = dto.Quantity
         }
-
 
 //===============================================
 // DTOs for PricedOrderLines

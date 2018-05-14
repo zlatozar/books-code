@@ -33,7 +33,6 @@ module Result =
         | Ok _, Error err2 -> Error err2
         | Error err1, Error _ -> Error err1 
 
-
     // combine a list of results, monadically
     let sequence aListOfResults = 
         let (<*>) = apply // monadic
@@ -92,7 +91,6 @@ module Result =
         | Ok x -> pred x
         | Error _ -> true
 
-
     //_________________________________________________________________________
     //                                        Mixing simple values and results
 
@@ -101,7 +99,6 @@ module Result =
         function 
         | Ok x -> x
         | Error _ -> defaultVal
-
 
     //_________________________________________________________________________
     //                                              Mixing options and results
@@ -130,7 +127,6 @@ module Result =
         function 
         | Ok _ -> None
         | Error err -> Some err
-
 
 //==============================================
 // Computation Expression for Result
@@ -290,7 +286,6 @@ module AsyncResult =
             | Choice1Of2 (Error err) -> Error err
             | Choice2Of2 ex -> Error (f ex))
 
-
     /// Apply an AsyncResult function to an AsyncResult value, monadically
     let applyM (fAsyncResult : AsyncResult<_, _>) (xAsyncResult : AsyncResult<_, _>) :AsyncResult<_,_> = 
         fAsyncResult |> Async.bind (fun fResult ->
@@ -309,7 +304,6 @@ module AsyncResult =
         | Error err -> return (Error err)
         }
 
-
     /// Convert a list of AsyncResult into a AsyncResult<list> using monadic style. 
     /// Only the first error is returned. The error type need not be a list.
     let sequenceM resultList = 
@@ -322,7 +316,6 @@ module AsyncResult =
         // loop through the list, prepending each element
         // to the initial value
         List.foldBack consR resultList  initialValue
-
 
     /// Convert a list of AsyncResult into a AsyncResult<list> using applicative style. 
     /// All the errors are returned. The error type must be a list.
@@ -362,7 +355,6 @@ module AsyncResult =
     let sleep ms = 
         Async.Sleep ms |> ofAsync
 
-    
 // ==================================
 // AsyncResult computation expression
 // ==================================

@@ -30,7 +30,6 @@ type HttpResponse = {
 /// An API takes a HttpRequest as input and returns a async response
 type PlaceOrderApi = HttpRequest -> Async<HttpResponse>
 
-
 // =============================
 // Implementation
 // =============================

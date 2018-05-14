@@ -14,7 +14,6 @@ open OrderTaking.Common
 //   and the implementation of the overall workflow
 // ======================================================
 
-
 //_________________________________________________________________________
 //                                    the workflow itself, without effects
 
@@ -163,7 +162,7 @@ type SendOrderAcknowledgment =
 type AcknowledgeOrder = 
     CreateOrderAcknowledgmentLetter  // dependency
      -> SendOrderAcknowledgment      // dependency
-     -> PricedOrder                  // input
+     -> PricedOrder                    // input
      -> OrderAcknowledgmentSent option // output
 
 // ---------------------------
@@ -233,7 +232,6 @@ let toAddress (checkAddressExists:CheckAddressExists) unvalidatedAddress =
         ZipCode = zipCode
         }
     address
-
 
 /// Function adapter to convert a predicate to a passthru 
 let predicateToPassthru errorMsg f x =
@@ -317,7 +315,6 @@ let toPricedOrderLine (getProductPrice:GetProductPrice) (validatedOrderLine:Vali
         }
     pricedLine
 
-
 let priceOrder : PriceOrder = 
     fun getProductPrice validatedOrder ->
         let lines = 
@@ -337,7 +334,6 @@ let priceOrder : PriceOrder =
             }
         pricedOrder 
         
-
 // ---------------------------
 // AcknowledgeOrder step
 // ---------------------------

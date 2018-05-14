@@ -27,7 +27,6 @@ type ZipCode = private ZipCode of string
 /// A US 2 letter state code
 type UsStateCode = private UsStateCode of string
 
-
 /// An Id for Orders. Constrained to be a non-empty string < 10 chars
 type OrderId = private OrderId of string
 

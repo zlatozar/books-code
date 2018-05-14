@@ -59,7 +59,6 @@ type PdfAttachment = {
     Bytes: byte[]
     }
 
-
 // ===============================
 // Reusable constructors and getters for constrained types
 // ===============================
@@ -166,7 +165,6 @@ module ZipCode =
     let create fieldName str = 
         let pattern = "\d{5}"
         ConstrainedType.createLike fieldName ZipCode pattern str
-
 
 module OrderId =
 

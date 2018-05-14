@@ -8,11 +8,9 @@
 // 3) The output is turned into a DTO which is turned into a HttpResponse
 // ======================================================
 
-
 open Newtonsoft.Json
 open OrderTaking.Common
 open OrderTaking.PlaceOrder
-
 
 type JsonString = string
 
@@ -32,7 +30,6 @@ type HttpResponse = {
 /// An API takes a HttpRequest as input and returns a async response
 type PlaceOrderApi = HttpRequest -> Async<HttpResponse>
 
-
 // =============================
 // Implementation
 // =============================
@@ -51,7 +48,6 @@ let checkAddressExists : Implementation.CheckAddressExists =
 let getProductPrice : Implementation.GetProductPrice =
     fun productCode -> 
         Price.unsafeCreate 1M  // dummy implementation
-
 
 let createOrderAcknowledgmentLetter : Implementation.CreateOrderAcknowledgmentLetter =
     fun pricedOrder ->

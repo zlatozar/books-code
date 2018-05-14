@@ -13,7 +13,6 @@ open OrderTaking.Common
 //   and the implementation of the overall workflow
 // ======================================================
 
-
 // ======================================================
 // Section 1 : Define each step in the workflow using types
 // ======================================================
@@ -116,7 +115,6 @@ type CreateEvents =
     PricedOrder                           // input
      -> OrderAcknowledgmentSent option    // input (event from previous step)
      -> PlaceOrderEvent list              // output
-
 
 // ======================================================
 // Section 2 : Implementation
@@ -308,7 +306,6 @@ let toPricedOrderLine (getProductPrice:GetProductPrice) (validatedOrderLine:Vali
         return pricedLine
     }
 
-
 let priceOrder : PriceOrder = 
     fun getProductPrice validatedOrder ->
         result {
@@ -404,7 +401,6 @@ let createEvents : CreateEvents =
         yield! orderPlacedEvents 
         yield! billingEvents
         ]            
-
 
 // ---------------------------
 // overall workflow

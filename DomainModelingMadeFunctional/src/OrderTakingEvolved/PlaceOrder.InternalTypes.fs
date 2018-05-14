@@ -177,4 +177,3 @@ type CreateEvents =
     PricedOrder                           // input
      -> OrderAcknowledgmentSent option    // input (event from previous step)
      -> PlaceOrderEvent list              // output
-
