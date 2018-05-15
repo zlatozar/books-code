@@ -1,5 +1,6 @@
 ﻿// We are defining types and submodules, so we can use a namespace
 // rather than a module at the top level
+
 namespace OrderTaking.PlaceOrder
 
 open OrderTaking.Common
@@ -42,8 +43,8 @@ type UnvalidatedOrder = {
     }
 
 
-// ------------------------------------
-// outputs from the workflow (success case)
+//_____________________________________________________________________________
+//                                    outputs from the workflow (success case)
 
 /// Event will be created if the Acknowledgment was successfully posted
 type OrderAcknowledgmentSent = {

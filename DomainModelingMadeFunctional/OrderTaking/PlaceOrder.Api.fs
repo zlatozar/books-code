@@ -1,12 +1,10 @@
 ﻿module OrderTaking.PlaceOrder.Api
 
-// ======================================================
 // This file contains the JSON API interface to the PlaceOrder workflow
 //
 // 1) The HttpRequest is turned into a DTO, which is then turned into a Domain object
 // 2) The main workflow function is called
 // 3) The output is turned into a DTO which is turned into a HttpResponse
-// ======================================================
 
 open Newtonsoft.Json
 open OrderTaking.Common
@@ -36,25 +34,25 @@ type PlaceOrderApi = HttpRequest -> Async<HttpResponse>
 
 // setup dummy dependencies            
 
-let checkProductExists : Implementation.CheckProductCodeExists =
+let checkProductExists :Implementation.CheckProductCodeExists =
     fun productCode -> 
         true // dummy implementation
 
-let checkAddressExists : Implementation.CheckAddressExists =
+let checkAddressExists :Implementation.CheckAddressExists =
     fun unvalidatedAddress -> 
         let checkedAddress = Implementation.CheckedAddress unvalidatedAddress 
         AsyncResult.retn checkedAddress 
 
-let getProductPrice : Implementation.GetProductPrice =
+let getProductPrice :Implementation.GetProductPrice =
     fun productCode -> 
         Price.unsafeCreate 1M  // dummy implementation
 
-let createOrderAcknowledgmentLetter : Implementation.CreateOrderAcknowledgmentLetter =
+let createOrderAcknowledgmentLetter :Implementation.CreateOrderAcknowledgmentLetter =
     fun pricedOrder ->
         let letterTest = Implementation.HtmlString "some text"
         letterTest 
 
-let sendOrderAcknowledgment : Implementation.SendOrderAcknowledgment =
+let sendOrderAcknowledgment :Implementation.SendOrderAcknowledgment =
     fun orderAcknowledgement ->
         Implementation.Sent 
         
@@ -69,8 +67,8 @@ let workflowResultToHttpReponse result =
         // turn domain events into dtos
         let dtos = 
             events 
-            |> List.map PlaceOrderEventDto.fromDomain
-            |> List.toArray // arrays are JSON friendly
+                |> List.map PlaceOrderEventDto.fromDomain
+                |> List.toArray // arrays are JSON friendly
         // and serialize to JSON
         let json = JsonConvert.SerializeObject(dtos)
         let response = 
@@ -91,7 +89,7 @@ let workflowResultToHttpReponse result =
             }
         response
 
-let placeOrderApi : PlaceOrderApi =
+let placeOrderApi :PlaceOrderApi =
     fun request ->
         // following the approach in "A Complete Serialization Pipeline" in chapter 11
 

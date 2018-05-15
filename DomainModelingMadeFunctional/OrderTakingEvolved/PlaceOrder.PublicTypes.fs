@@ -1,5 +1,6 @@
 ﻿// We are defining types and submodules, so we can use a namespace
 // rather than a module at the top level
+
 namespace OrderTaking.PlaceOrder
 
 open OrderTaking.Common

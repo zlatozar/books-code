@@ -36,16 +36,16 @@ type PlaceOrderApi = HttpRequest -> Async<HttpResponse>
 
 // setup dummy dependencies            
 
-let checkProductExists : CheckProductCodeExists =
+let checkProductExists :CheckProductCodeExists =
     fun productCode -> 
         true // dummy implementation
 
-let checkAddressExists : CheckAddressExists =
+let checkAddressExists :CheckAddressExists =
     fun unvalidatedAddress -> 
         let checkedAddress = CheckedAddress unvalidatedAddress 
         AsyncResult.retn checkedAddress 
 
-let getStandardPrices() : GetProductPrice =
+let getStandardPrices() :GetProductPrice =
     fun productCode -> 
         Price.unsafeCreate 10M 
 
@@ -58,20 +58,20 @@ let getPromotionPrices (PromotionCode promotionCode) :TryGetProductPrice =
             else
                 None
 
-    let quarterPricePromotion : TryGetProductPrice = 
+    let quarterPricePromotion :TryGetProductPrice = 
         fun productCode -> 
             if ProductCode.value productCode = "ONSALE" then
                 Price.unsafeCreate 2.5M |> Some
             else
                 None
 
-    let noPromotion : TryGetProductPrice = 
+    let noPromotion :TryGetProductPrice = 
         fun productCode -> None
 
     match promotionCode with
-    | "HALF" -> halfPricePromotion
+    | "HALF"    -> halfPricePromotion
     | "QUARTER" -> quarterPricePromotion
-    | _ -> noPromotion 
+    | _         -> noPromotion 
 
 let getPricingFunction :GetPricingFunction = 
     PricingModule.getPricingFunction getStandardPrices  getPromotionPrices 
@@ -79,12 +79,12 @@ let getPricingFunction :GetPricingFunction =
 let calculateShippingCost = 
     Implementation.calculateShippingCost
 
-let createOrderAcknowledgmentLetter : CreateOrderAcknowledgmentLetter =
+let createOrderAcknowledgmentLetter :CreateOrderAcknowledgmentLetter =
     fun pricedOrder ->
         let letterTest = HtmlString "some text"
         letterTest 
 
-let sendOrderAcknowledgment : SendOrderAcknowledgment =
+let sendOrderAcknowledgment :SendOrderAcknowledgment =
     fun orderAcknowledgement ->
         Sent 
         
@@ -99,8 +99,8 @@ let workflowResultToHttpReponse result =
         // turn domain events into DTOs
         let dtos = 
             events 
-            |> List.map PlaceOrderEventDto.fromDomain
-            |> List.toArray // arrays are JSON friendly
+                |> List.map PlaceOrderEventDto.fromDomain
+                |> List.toArray // arrays are JSON friendly
         // and serialize to JSON
         let json = JsonConvert.SerializeObject(dtos)
         let response = 
@@ -121,7 +121,7 @@ let workflowResultToHttpReponse result =
             }
         response
 
-let placeOrderApi : PlaceOrderApi =
+let placeOrderApi :PlaceOrderApi =
     fun request ->
         // following the approach in "A Complete Serialization Pipeline" in chapter 11
 
@@ -146,4 +146,4 @@ let placeOrderApi : PlaceOrderApi =
 
         // now convert from the pure domain back to a HttpResponse
         asyncResult 
-        |> Async.map (workflowResultToHttpReponse)
+            |> Async.map (workflowResultToHttpReponse)

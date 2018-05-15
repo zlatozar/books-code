@@ -1,5 +1,6 @@
 ﻿// We are defining types and submodules, so we can use a namespace
 // rather than a module at the top level
+
 namespace OrderTaking.Common  
 
 open System
@@ -216,7 +217,7 @@ module ProductCode =
     let value productCode = 
         match productCode with
         | Widget (WidgetCode wc) -> wc
-        | Gizmo (GizmoCode gc) -> gc
+        | Gizmo (GizmoCode gc)   -> gc
 
     /// Create an ProductCode from a string
     /// Return Error if input is null, empty, or not matching pattern
@@ -289,10 +290,8 @@ module Price =
     let unsafeCreate v = 
         create v 
         |> function
-            | Ok price -> 
-                price
-            | Error err -> 
-                failwithf "Not expecting Price to be out of bounds: %s" err
+            | Ok price  -> price
+            | Error err -> failwithf "Not expecting Price to be out of bounds: %s" err
 
     /// Multiply a Price by a decimal qty.
     /// Return Error if new price is out of bounds.

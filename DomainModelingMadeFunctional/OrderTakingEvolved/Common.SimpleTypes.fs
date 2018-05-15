@@ -1,5 +1,6 @@
 ﻿// We are defining types and submodules, so we can use a namespace
 // rather than a module at the top level
+
 namespace OrderTaking.Common  
 
 open System
@@ -131,7 +132,7 @@ module ConstrainedType =
         if String.IsNullOrEmpty(str) then
             let msg = sprintf "%s: Must not be null or empty" fieldName 
             Error msg
-        elif System.Text.RegularExpressions.Regex.IsMatch(str,pattern) then
+        elif System.Text.RegularExpressions.Regex.IsMatch(str, pattern) then
             Ok (ctor str)
         else
             let msg = sprintf "%s: '%s' must match the pattern '%s'" fieldName str pattern
@@ -171,20 +172,17 @@ module VipStatus =
     let value status = 
         match status with
         | Normal -> "Normal"
-        | Vip -> "VIP"
+        | Vip    -> "VIP"
 
     /// Create a VipStatus from a string
     /// Return Error if input is null, empty, or doesn't match one of the cases
     let create fieldName str = 
         match str with
-        | "normal" | "Normal" -> 
-            Ok Normal
-        | "vip" | "VIP" -> 
-            Ok Vip
-        | _ -> 
-            // all other cases
-            let msg = sprintf "%s: Must be one of 'Normal', 'VIP'" fieldName 
-            Error msg
+        | "normal" | "Normal" -> Ok Normal
+        | "vip" | "VIP"       -> Ok Vip
+        | _                   -> 
+                                let msg = sprintf "%s: Must be one of 'Normal', 'VIP'" fieldName 
+                                Error msg
 
 module ZipCode =
 
@@ -258,7 +256,7 @@ module ProductCode =
     let value productCode = 
         match productCode with
         | Widget (WidgetCode wc) -> wc
-        | Gizmo (GizmoCode gc) -> gc
+        | Gizmo (GizmoCode gc)   -> gc
 
     /// Create an ProductCode from a string
     /// Return Error if input is null, empty, or not matching pattern
@@ -268,10 +266,10 @@ module ProductCode =
             Error msg
         else if code.StartsWith("W") then
             WidgetCode.create fieldName code 
-            |> Result.map Widget
+                |> Result.map Widget
         else if code.StartsWith("G") then
             GizmoCode.create fieldName code
-            |> Result.map Gizmo
+                |> Result.map Gizmo
         else 
             let msg = sprintf "%s: Format not recognized '%s'" fieldName code
             Error msg
@@ -301,7 +299,7 @@ module OrderQuantity  =
     /// Return the value inside a OrderQuantity  
     let value qty = 
         match qty with
-        | Unit uq -> 
+        | Unit uq     -> 
             uq |> UnitQuantity.value |> decimal
         | Kilogram kq -> 
             kq |> KilogramQuantity.value 
@@ -310,11 +308,11 @@ module OrderQuantity  =
     let create fieldName productCode quantity  = 
         match productCode with
         | Widget _ -> 
-            UnitQuantity.create fieldName (int quantity) // convert float to int 
-            |> Result.map OrderQuantity.Unit             // lift to OrderQuantity type
+            UnitQuantity.create fieldName (int quantity)  // convert float to int 
+                |> Result.map OrderQuantity.Unit          // lift to OrderQuantity type
         | Gizmo _ -> 
             KilogramQuantity.create fieldName quantity 
-            |> Result.map OrderQuantity.Kilogram         // lift to OrderQuantity type
+                |> Result.map OrderQuantity.Kilogram      // lift to OrderQuantity type
 
 module Price =
 
@@ -330,11 +328,9 @@ module Price =
     /// Throw an exception if out of bounds. This should only be used if you know the value is valid.
     let unsafeCreate v = 
         create v 
-        |> function
-            | Ok price -> 
-                price
-            | Error err -> 
-                failwithf "Not expecting Price to be out of bounds: %s" err
+            |> function
+               | Ok price  -> price
+               | Error err -> failwithf "Not expecting Price to be out of bounds: %s" err
 
     /// Multiply a Price by a decimal qty.
     /// Return Error if new price is out of bounds.

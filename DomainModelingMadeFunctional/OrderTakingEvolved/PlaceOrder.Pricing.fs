@@ -35,6 +35,7 @@ module internal PricingModule =
         let getPromotionPrice promotionCode : GetProductPrice =
             // cache the promotional prices
             let getPromotionPrice = promoPrices promotionCode
+            
             // return the lookup function
             fun productCode ->
                 match getPromotionPrice productCode with

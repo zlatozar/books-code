@@ -26,20 +26,20 @@ let toCustomerInfo (unvalidatedCustomerInfo: UnvalidatedCustomerInfo) =
     result {
         let! firstName = 
             unvalidatedCustomerInfo.FirstName
-            |> String50.create "FirstName"
-            |> Result.mapError ValidationError // convert creation error into ValidationError
+                |> String50.create "FirstName"
+                |> Result.mapError ValidationError // convert creation error into ValidationError
         let! lastName = 
             unvalidatedCustomerInfo.LastName
-            |> String50.create "LastName"
-            |> Result.mapError ValidationError // convert creation error into ValidationError
+                |> String50.create "LastName"
+                |> Result.mapError ValidationError // convert creation error into ValidationError
         let! emailAddress = 
             unvalidatedCustomerInfo.EmailAddress
-            |> EmailAddress.create "EmailAddress"
-            |> Result.mapError ValidationError // convert creation error into ValidationError
+                |> EmailAddress.create "EmailAddress"
+                |> Result.mapError ValidationError // convert creation error into ValidationError
         let! vipStatus = 
             unvalidatedCustomerInfo.VipStatus 
-            |> VipStatus.create "vipStatus"
-            |> Result.mapError ValidationError // convert creation error into ValidationError
+                |> VipStatus.create "vipStatus"
+                |> Result.mapError ValidationError // convert creation error into ValidationError
 
         let customerInfo = {
             Name = {FirstName=firstName; LastName=lastName}
@@ -53,36 +53,36 @@ let toAddress (CheckedAddress unvalidatedAddress) =
     result {
         let! addressLine1 = 
             unvalidatedAddress.AddressLine1 
-            |> String50.create "AddressLine1" 
-            |> Result.mapError ValidationError // convert creation error into ValidationError
+                |> String50.create "AddressLine1" 
+                |> Result.mapError ValidationError // convert creation error into ValidationError
         let! addressLine2 = 
             unvalidatedAddress.AddressLine2 
-            |> String50.createOption "AddressLine2"
-            |> Result.mapError ValidationError // convert creation error into ValidationError
+                |> String50.createOption "AddressLine2"
+                |> Result.mapError ValidationError // convert creation error into ValidationError
         let! addressLine3 = 
             unvalidatedAddress.AddressLine3 
-            |> String50.createOption "AddressLine3" 
-            |> Result.mapError ValidationError // convert creation error into ValidationError
+                |> String50.createOption "AddressLine3" 
+                |> Result.mapError ValidationError // convert creation error into ValidationError
         let! addressLine4 = 
             unvalidatedAddress.AddressLine4 
-            |> String50.createOption "AddressLine4"
-            |> Result.mapError ValidationError // convert creation error into ValidationError
+                |> String50.createOption "AddressLine4"
+                |> Result.mapError ValidationError // convert creation error into ValidationError
         let! city = 
             unvalidatedAddress.City
-            |> String50.create "City"
-            |> Result.mapError ValidationError // convert creation error into ValidationError
+                |> String50.create "City"
+                |> Result.mapError ValidationError // convert creation error into ValidationError
         let! zipCode = 
             unvalidatedAddress.ZipCode
-            |> ZipCode.create "ZipCode"
-            |> Result.mapError ValidationError // convert creation error into ValidationError
+                |> ZipCode.create "ZipCode"
+                |> Result.mapError ValidationError // convert creation error into ValidationError
         let! state = 
             unvalidatedAddress.State
-            |> UsStateCode.create "State"
-            |> Result.mapError ValidationError // convert creation error into ValidationError
+                |> UsStateCode.create "State"
+                |> Result.mapError ValidationError // convert creation error into ValidationError
         let! country = 
             unvalidatedAddress.Country 
-            |> String50.create "Country"
-            |> Result.mapError ValidationError // convert creation error into ValidationError
+                |> String50.create "Country"
+                |> Result.mapError ValidationError // convert creation error into ValidationError
         let address : Address = {
             AddressLine1 = addressLine1
             AddressLine2 = addressLine2
@@ -99,23 +99,23 @@ let toAddress (CheckedAddress unvalidatedAddress) =
 /// Call the checkAddressExists and convert the error to a ValidationError
 let toCheckedAddress (checkAddress:CheckAddressExists) address =
     address 
-    |> checkAddress 
-    |> AsyncResult.mapError (fun addrError -> 
-        match addrError with
-        | AddressNotFound -> ValidationError "Address not found"
-        | InvalidFormat -> ValidationError "Address has bad format"
+        |> checkAddress 
+        |> AsyncResult.mapError (fun addrError -> 
+                                            match addrError with
+                                            | AddressNotFound -> ValidationError "Address not found"
+                                            | InvalidFormat -> ValidationError "Address has bad format"
         )
 
 let toOrderId orderId = 
     orderId 
-    |> OrderId.create "OrderId"
-    |> Result.mapError ValidationError // convert creation error into ValidationError
+        |> OrderId.create "OrderId"
+        |> Result.mapError ValidationError // convert creation error into ValidationError
 
 /// Helper function for validateOrder   
 let toOrderLineId orderId = 
     orderId 
-    |> OrderLineId.create "OrderLineId"
-    |> Result.mapError ValidationError // convert creation error into ValidationError
+        |> OrderLineId.create "OrderLineId"
+        |> Result.mapError ValidationError // convert creation error into ValidationError
 
 /// Helper function for validateOrder   
 let toProductCode (checkProductCodeExists:CheckProductCodeExists) productCode = 
@@ -131,27 +131,27 @@ let toProductCode (checkProductCodeExists:CheckProductCodeExists) productCode =
         
     // assemble the pipeline        
     productCode
-    |> ProductCode.create "ProductCode"
-    |> Result.mapError ValidationError // convert creation error into ValidationError
-    |> Result.bind checkProduct 
+        |> ProductCode.create "ProductCode"
+        |> Result.mapError ValidationError // convert creation error into ValidationError
+        |> Result.bind checkProduct 
 
 /// Helper function for validateOrder   
 let toOrderQuantity productCode quantity = 
     OrderQuantity.create "OrderQuantity" productCode quantity  
-    |> Result.mapError ValidationError // convert creation error into ValidationError
+        |> Result.mapError ValidationError // convert creation error into ValidationError
    
 /// Helper function for validateOrder   
 let toValidatedOrderLine checkProductExists (unvalidatedOrderLine:UnvalidatedOrderLine) = 
     result {
         let! orderLineId = 
             unvalidatedOrderLine.OrderLineId 
-            |> toOrderLineId
+                |> toOrderLineId
         let! productCode = 
             unvalidatedOrderLine.ProductCode 
-            |> toProductCode checkProductExists
+                |> toProductCode checkProductExists
         let! quantity = 
             unvalidatedOrderLine.Quantity 
-            |> toOrderQuantity productCode 
+                |> toOrderQuantity productCode 
         let validatedOrderLine : ValidatedOrderLine = {
             OrderLineId = orderLineId 
             ProductCode = productCode 
@@ -165,34 +165,34 @@ let validateOrder : ValidateOrder =
         asyncResult {
             let! orderId = 
                 unvalidatedOrder.OrderId 
-                |> toOrderId
-                |> AsyncResult.ofResult
+                    |> toOrderId
+                    |> AsyncResult.ofResult
             let! customerInfo = 
                 unvalidatedOrder.CustomerInfo 
-                |> toCustomerInfo
-                |> AsyncResult.ofResult
+                    |> toCustomerInfo
+                    |> AsyncResult.ofResult
             let! checkedShippingAddress = 
                 unvalidatedOrder.ShippingAddress 
-                |> toCheckedAddress checkAddressExists
+                    |> toCheckedAddress checkAddressExists
             let! shippingAddress = 
                 checkedShippingAddress 
-                |> toAddress 
-                |> AsyncResult.ofResult
+                    |> toAddress 
+                    |> AsyncResult.ofResult
             let! checkedBillingAddress = 
                 unvalidatedOrder.BillingAddress 
-                |> toCheckedAddress checkAddressExists
+                    |> toCheckedAddress checkAddressExists
             let! billingAddress  = 
                 checkedBillingAddress
-                |> toAddress 
-                |> AsyncResult.ofResult
+                    |> toAddress 
+                    |> AsyncResult.ofResult
             let! lines = 
                 unvalidatedOrder.Lines 
-                |> List.map (toValidatedOrderLine checkProductCodeExists) 
-                |> Result.sequence // convert list of Results to a single Result
-                |> AsyncResult.ofResult
+                    |> List.map (toValidatedOrderLine checkProductCodeExists) 
+                    |> Result.sequence // convert list of Results to a single Result
+                    |> AsyncResult.ofResult
             let pricingMethod = 
                 unvalidatedOrder.PromotionCode
-                |> PricingModule.createPricingMethod 
+                    |> PricingModule.createPricingMethod 
 
             let validatedOrder : ValidatedOrder = {
                 OrderId  = orderId 
@@ -215,7 +215,7 @@ let toPricedOrderLine (getProductPrice:GetProductPrice) (validatedOrderLine:Vali
         let price = validatedOrderLine.ProductCode |> getProductPrice 
         let! linePrice = 
             Price.multiply qty price 
-            |> Result.mapError PricingError // convert to PlaceOrderError
+                |> Result.mapError PricingError // convert to PlaceOrderError
         let pricedLine : PricedOrderProductLine = {
             OrderLineId = validatedOrderLine.OrderLineId 
             ProductCode = validatedOrderLine.ProductCode 
@@ -235,7 +235,7 @@ let addCommentLine pricingMethod lines =
     | Promotion (PromotionCode promoCode) ->  
         let commentLine = 
             sprintf "Applied promotion %s" promoCode 
-            |> CommentLine // lift to PricedOrderLine
+                |> CommentLine // lift to PricedOrderLine
         List.append lines [commentLine]
 
 let getLinePrice line =
@@ -251,17 +251,16 @@ let priceOrder : PriceOrder =
         result {
             let! lines = 
                 validatedOrder.Lines 
-                |> List.map (toPricedOrderLine getProductPrice) 
-                |> Result.sequence // convert list of Results to a single Result
-                |> Result.map (fun lines ->
-                    lines |> addCommentLine validatedOrder.PricingMethod 
-                    )
+                    |> List.map (toPricedOrderLine getProductPrice) 
+                    |> Result.sequence // convert list of Results to a single Result
+                    |> Result.map (fun lines ->
+                                        lines |> addCommentLine validatedOrder.PricingMethod)
 
             let! amountToBill = 
                 lines 
-                |> List.map getLinePrice                   // get each line price
-                |> BillingAmount.sumPrices                 // add them together as a BillingAmount
-                |> Result.mapError PricingError            // convert to PlaceOrderError
+                    |> List.map getLinePrice                   // get each line price
+                    |> BillingAmount.sumPrices                 // add them together as a BillingAmount
+                    |> Result.mapError PricingError            // convert to PlaceOrderError
             let pricedOrder : PricedOrder = {
                 OrderId  = validatedOrder.OrderId 
                 CustomerInfo = validatedOrder.CustomerInfo 
@@ -278,25 +277,24 @@ let priceOrder : PriceOrder =
 // Shipping step
 // ---------------------------
 
-let (|UsLocalState|UsRemoteState|International|) (address:Address) = 
+// Active patterns
+let (|UsLocalState|UsRemoteState|International|) (address: Address) = 
     if address.Country |> String50.value = "US" then
         match address.State |> UsStateCode.value  with
-        | "CA" | "OR" | "AZ" | "NV" -> 
-            UsLocalState
-        | _ -> 
-            UsRemoteState
+        | "CA" | "OR" | "AZ" | "NV" -> UsLocalState
+        | _                         -> UsRemoteState
     else
         International
 
-let calculateShippingCost : CalculateShippingCost =
+let calculateShippingCost :CalculateShippingCost =
     fun pricedOrder ->
-        match pricedOrder.ShippingAddress with
+            match pricedOrder.ShippingAddress with
             | UsLocalState -> 5.0M
             | UsRemoteState -> 10.0M
             | International -> 20.0M
-        |> Price.unsafeCreate
+            |> Price.unsafeCreate
 
-let addShippingInfoToOrder : AddShippingInfoToOrder  =
+let addShippingInfoToOrder :AddShippingInfoToOrder  =
     fun calculateShippingCost pricedOrder ->
         // create the shipping info
         let shippingInfo = {
@@ -396,24 +394,24 @@ let createBillingEvent (placedOrder:PricedOrder) : BillableOrderPlaced option =
 let listOfOption opt =
     match opt with 
     | Some x -> [x]
-    | None -> []
+    | None   -> []
 
 let createEvents : CreateEvents = 
     fun pricedOrder acknowledgmentEventOpt ->
         let acknowledgmentEvents = 
             acknowledgmentEventOpt 
-            |> Option.map PlaceOrderEvent.AcknowledgmentSent
-            |> listOfOption
+                |> Option.map PlaceOrderEvent.AcknowledgmentSent
+                |> listOfOption
         let shippingEvents = 
             pricedOrder
-            |> createShippingEvent
-            |> PlaceOrderEvent.ShippableOrderPlaced
-            |> List.singleton
+                |> createShippingEvent
+                |> PlaceOrderEvent.ShippableOrderPlaced
+                |> List.singleton
         let billingEvents = 
             pricedOrder
-            |> createBillingEvent 
-            |> Option.map PlaceOrderEvent.BillableOrderPlaced
-            |> listOfOption
+                |> createBillingEvent 
+                |> Option.map PlaceOrderEvent.BillableOrderPlaced
+                |> listOfOption
 
         // return all the events
         [
@@ -439,15 +437,15 @@ let placeOrder
         asyncResult {
             let! validatedOrder = 
                 validateOrder checkProductExists checkAddressExists unvalidatedOrder 
-                |> AsyncResult.mapError PlaceOrderError.Validation
+                    |> AsyncResult.mapError PlaceOrderError.Validation
             let! pricedOrder = 
                 priceOrder getProductPrice validatedOrder 
-                |> AsyncResult.ofResult
-                |> AsyncResult.mapError PlaceOrderError.Pricing
+                    |> AsyncResult.ofResult
+                    |> AsyncResult.mapError PlaceOrderError.Pricing
             let pricedOrderWithShipping = 
                 pricedOrder 
-                |> addShippingInfoToOrder calculateShippingCost
-                |> freeVipShipping
+                    |> addShippingInfoToOrder calculateShippingCost
+                    |> freeVipShipping
             let acknowledgementOption = 
                 acknowledgeOrder createOrderAcknowledgmentLetter sendOrderAcknowledgment pricedOrderWithShipping 
             let events = 

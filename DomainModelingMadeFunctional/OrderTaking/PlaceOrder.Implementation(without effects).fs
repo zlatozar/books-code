@@ -2,9 +2,8 @@
 
 open OrderTaking.Common
 
-// ======================================================
 // This file contains the implementation for the PlaceOrder workflow
-// WITHOUT any effects like Result or Async
+// WITHOUT any effects like Result or Async.
 //
 // This represents the code in chapter 9, "Composing a Pipeline"
 //
@@ -12,7 +11,6 @@ open OrderTaking.Common
 // * the first section contains the (type-only) definitions for each step
 // * the second section contains the implementations for each step
 //   and the implementation of the overall workflow
-// ======================================================
 
 //_________________________________________________________________________
 //                                    the workflow itself, without effects
@@ -132,7 +130,6 @@ type PriceOrder =
       -> ValidatedOrder // input
       -> PricedOrder    // output
 
-
 // ---------------------------
 // Send OrderAcknowledgment 
 // ---------------------------
@@ -186,13 +183,13 @@ type CreateEvents =
 let toCustomerInfo (unvalidatedCustomerInfo: UnvalidatedCustomerInfo) =
     let firstName = 
         unvalidatedCustomerInfo.FirstName
-        |> String50.create "FirstName"
+            |> String50.create "FirstName"
     let lastName = 
         unvalidatedCustomerInfo.LastName
-        |> String50.create "LastName"
+            |> String50.create "LastName"
     let emailAddress = 
         unvalidatedCustomerInfo.EmailAddress
-        |> EmailAddress.create "EmailAddress"
+            |> EmailAddress.create "EmailAddress"
     let customerInfo = {
         Name = {FirstName=firstName; LastName=lastName}
         EmailAddress = emailAddress
@@ -207,22 +204,22 @@ let toAddress (checkAddressExists:CheckAddressExists) unvalidatedAddress =
 
     let addressLine1 = 
         checkedAddress.AddressLine1 
-        |> String50.create "AddressLine1" 
+            |> String50.create "AddressLine1" 
     let addressLine2 = 
         checkedAddress.AddressLine2 
-        |> String50.createOption "AddressLine2" 
+            |> String50.createOption "AddressLine2" 
     let addressLine3 = 
         checkedAddress.AddressLine3 
-        |> String50.createOption "AddressLine3"
+            |> String50.createOption "AddressLine3"
     let addressLine4 = 
         checkedAddress.AddressLine4 
-        |> String50.createOption "AddressLine4"
+            |> String50.createOption "AddressLine4"
     let city = 
         checkedAddress.City
-        |> String50.create "City"
+            |> String50.create "City"
     let zipCode = 
         checkedAddress.ZipCode
-        |> ZipCode.create "ZipCode"
+            |> ZipCode.create "ZipCode"
     let address : Address = {
         AddressLine1 = addressLine1
         AddressLine2 = addressLine2
@@ -251,21 +248,21 @@ let toProductCode (checkProductCodeExists:CheckProductCodeExists) productCode =
         
     // assemble the pipeline        
     productCode
-    |> ProductCode.create "ProductCode"
-    |> checkProduct 
+        |> ProductCode.create "ProductCode"
+        |> checkProduct 
 
    
 /// Helper function for validateOrder   
 let toValidatedOrderLine checkProductExists (unvalidatedOrderLine:UnvalidatedOrderLine) = 
     let orderLineId = 
         unvalidatedOrderLine.OrderLineId 
-        |> OrderLineId.create "OrderLineId" 
+            |> OrderLineId.create "OrderLineId" 
     let productCode = 
         unvalidatedOrderLine.ProductCode 
-        |> toProductCode checkProductExists
+            |> toProductCode checkProductExists
     let quantity = 
         unvalidatedOrderLine.Quantity 
-        |> OrderQuantity.create "OrderQuantity" productCode 
+            |> OrderQuantity.create "OrderQuantity" productCode 
     let validatedOrderLine = {
         OrderLineId = orderLineId 
         ProductCode = productCode 
@@ -277,19 +274,19 @@ let validateOrder : ValidateOrder =
     fun checkProductCodeExists checkAddressExists unvalidatedOrder ->
         let orderId = 
             unvalidatedOrder.OrderId 
-            |> OrderId.create "OrderId" 
+                |> OrderId.create "OrderId" 
         let customerInfo = 
             unvalidatedOrder.CustomerInfo 
-            |> toCustomerInfo
+                |> toCustomerInfo
         let shippingAddress = 
             unvalidatedOrder.ShippingAddress 
-            |> toAddress checkAddressExists
+                |> toAddress checkAddressExists
         let billingAddress  = 
             unvalidatedOrder.BillingAddress 
-            |> toAddress checkAddressExists
+                |> toAddress checkAddressExists
         let lines = 
             unvalidatedOrder.Lines 
-            |> List.map (toValidatedOrderLine checkProductCodeExists) 
+                |> List.map (toValidatedOrderLine checkProductCodeExists) 
         let validatedOrder : ValidatedOrder = {
             OrderId  = orderId 
             CustomerInfo = customerInfo 
@@ -319,11 +316,11 @@ let priceOrder : PriceOrder =
     fun getProductPrice validatedOrder ->
         let lines = 
             validatedOrder.Lines 
-            |> List.map (toPricedOrderLine getProductPrice) 
+                |> List.map (toPricedOrderLine getProductPrice) 
         let amountToBill = 
             lines 
-            |> List.map (fun line -> line.LinePrice)  // get each line price
-            |> BillingAmount.sumPrices                // add them together as a BillingAmount
+                |> List.map (fun line -> line.LinePrice)  // get each line price
+                |> BillingAmount.sumPrices                // add them together as a BillingAmount
         let pricedOrder : PricedOrder = {
             OrderId  = validatedOrder.OrderId 
             CustomerInfo = validatedOrder.CustomerInfo 
@@ -349,7 +346,7 @@ let acknowledgeOrder : AcknowledgeOrder =
         // if the acknowledgement was successfully sent,
         // return the corresponding event, else return None
         match sendAcknowledgment acknowledgment with
-        | Sent -> 
+        | Sent    -> 
             let event = {
                 OrderId = pricedOrder.OrderId
                 EmailAddress = pricedOrder.CustomerInfo.EmailAddress
@@ -386,18 +383,18 @@ let createEvents : CreateEvents =
     fun pricedOrder acknowledgmentEventOpt ->
         let acknowledgmentEvents = 
             acknowledgmentEventOpt 
-            |> Option.map PlaceOrderEvent.AcknowledgmentSent
-            |> listOfOption
+                |> Option.map PlaceOrderEvent.AcknowledgmentSent
+                |> listOfOption
         let orderPlacedEvents = 
             pricedOrder
-            |> createOrderPlacedEvent
-            |> PlaceOrderEvent.OrderPlaced
-            |> List.singleton
+                |> createOrderPlacedEvent
+                |> PlaceOrderEvent.OrderPlaced
+                |> List.singleton
         let billingEvents = 
             pricedOrder
-            |> createBillingEvent 
-            |> Option.map PlaceOrderEvent.BillableOrderPlaced
-            |> listOfOption
+                |> createBillingEvent 
+                |> Option.map PlaceOrderEvent.BillableOrderPlaced
+                |> listOfOption
 
         // return all the events
         [
@@ -421,13 +418,13 @@ let placeOrder
     fun unvalidatedOrder -> 
         let validatedOrder = 
             unvalidatedOrder 
-            |> validateOrder checkProductExists checkAddressExists 
+                |> validateOrder checkProductExists checkAddressExists 
         let pricedOrder = 
             validatedOrder 
-            |> priceOrder getProductPrice 
+                |> priceOrder getProductPrice 
         let acknowledgementOption = 
             pricedOrder 
-            |> acknowledgeOrder createOrderAcknowledgmentLetter sendOrderAcknowledgment 
+                |> acknowledgeOrder createOrderAcknowledgmentLetter sendOrderAcknowledgment 
         let events = 
             createEvents pricedOrder acknowledgementOption 
         events
