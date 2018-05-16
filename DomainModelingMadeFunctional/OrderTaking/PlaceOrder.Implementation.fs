@@ -1,8 +1,8 @@
 ﻿module internal OrderTaking.PlaceOrder.Implementation
 
+// version 2
 open OrderTaking.Common
 
-// ======================================================
 // This file contains the final implementation for the PlaceOrder workflow
 //
 // This represents the code in chapter 10, "Working with Errors"
@@ -11,22 +11,20 @@ open OrderTaking.Common
 // * the first section contains the (type-only) definitions for each step
 // * the second section contains the implementations for each step
 //   and the implementation of the overall workflow
-// ======================================================
 
 // ======================================================
 // Section 1 : Define each step in the workflow using types
 // ======================================================
 
-// ---------------------------
-// Validation step
-// ---------------------------
+//_____________________________________________________________________________
+//                 Types                                   1.1 Validation step
 
-// Product validation
+// 1.1.1 Product validation
 
 type CheckProductCodeExists = 
     ProductCode -> bool
 
-// Address validation
+// 1.1.2 Address validation exception
 type AddressValidationError = 
     | InvalidFormat 
     | AddressNotFound 
@@ -36,9 +34,7 @@ type CheckedAddress = CheckedAddress of UnvalidatedAddress
 type CheckAddressExists = 
     UnvalidatedAddress -> AsyncResult<CheckedAddress,AddressValidationError>
 
-// ---------------------------
-// Validated Order 
-// ---------------------------
+// 1.1.3 Validated Order 
 
 type ValidatedOrderLine =  {
     OrderLineId : OrderLineId 
@@ -60,23 +56,21 @@ type ValidateOrder =
      -> UnvalidatedOrder    // input
      -> AsyncResult<ValidatedOrder, ValidationError> // output
 
-// ---------------------------
-// Pricing step
-// ---------------------------
+//_____________________________________________________________________________
+//                 Types                                      1.2 Pricing step
 
 type GetProductPrice = 
     ProductCode -> Price
 
-// priced state is defined Domain.WorkflowTypes
+// Implemetation
 
 type PriceOrder = 
     GetProductPrice     // dependency
      -> ValidatedOrder  // input
      -> Result<PricedOrder, PricingError>  // output
 
-// ---------------------------
-// Send OrderAcknowledgment 
-// ---------------------------
+//_____________________________________________________________________________
+//                 Types                          1.3 Send OrderAcknowledgment 
 
 type HtmlString = 
     HtmlString of string
@@ -89,26 +83,30 @@ type OrderAcknowledgment = {
 type CreateOrderAcknowledgmentLetter =
     PricedOrder -> HtmlString
 
+//_____________________________________________________________________________
+//                 Types    1.4 Send the order acknowledgement to the customer
+
 /// Send the order acknowledgement to the customer
 /// Note that this does NOT generate an Result-type error (at least not in this workflow)
-/// because on failure we will continue anyway.
-/// On success, we will generate a OrderAcknowledgmentSent event,
-/// but on failure we won't.
-
+/// because on failure we will continue anyway. On success, we will generate
+/// a OrderAcknowledgmentSent event, but on failure we won't.
 type SendResult = Sent | NotSent
 
 type SendOrderAcknowledgment =
     OrderAcknowledgment -> SendResult 
     
+// Implemetation
+
 type AcknowledgeOrder = 
     CreateOrderAcknowledgmentLetter  // dependency
      -> SendOrderAcknowledgment      // dependency
      -> PricedOrder                  // input
      -> OrderAcknowledgmentSent option // output
 
-// ---------------------------
-// Create events
-// ---------------------------
+//_____________________________________________________________________________
+//                 Types                                     1.5 Create events
+
+// Implemetation
 
 type CreateEvents = 
     PricedOrder                           // input
@@ -116,12 +114,11 @@ type CreateEvents =
      -> PlaceOrderEvent list              // output
 
 // ======================================================
-// Section 2 : Implementation
+// Section 2 : Implementation of dependencies
 // ======================================================
 
-// ---------------------------
-// ValidateOrder step
-// ---------------------------
+//_____________________________________________________________________________
+//                 Imlementation                        2.1 ValidateOrder step
 
 let toCustomerInfo (unvalidatedCustomerInfo: UnvalidatedCustomerInfo) =
     result {
@@ -144,6 +141,7 @@ let toCustomerInfo (unvalidatedCustomerInfo: UnvalidatedCustomerInfo) =
         return customerInfo 
     }
 
+// Note the parameter
 let toAddress (CheckedAddress unvalidatedAddress) =
     result {
         let! addressLine1 = 
@@ -182,14 +180,13 @@ let toAddress (CheckedAddress unvalidatedAddress) =
     }
 
 /// Call the checkAddressExists and convert the error to a ValidationError
-let toCheckedAddress (checkAddress:CheckAddressExists) address =
+let toCheckedAddress (checkAddress: CheckAddressExists) address =
     address 
         |> checkAddress 
         |> AsyncResult.mapError (fun addrError -> 
-            match addrError with
-            | AddressNotFound -> ValidationError "Address not found"
-            | InvalidFormat -> ValidationError "Address has bad format"
-            )
+                                        match addrError with
+                                        | AddressNotFound -> ValidationError "Address not found"
+                                        | InvalidFormat -> ValidationError "Address has bad format")
 
 let toOrderId orderId = 
     orderId 
@@ -203,8 +200,7 @@ let toOrderLineId orderId =
         |> Result.mapError ValidationError // convert creation error into ValidationError
 
 /// Helper function for validateOrder   
-let toProductCode (checkProductCodeExists:CheckProductCodeExists) productCode = 
-
+let toProductCode (checkProductCodeExists: CheckProductCodeExists) productCode = 
     // create a ProductCode -> Result<ProductCode,...> function 
     // suitable for using in a pipeline
     let checkProduct productCode  = 
@@ -226,7 +222,7 @@ let toOrderQuantity productCode quantity =
         |> Result.mapError ValidationError // convert creation error into ValidationError
    
 /// Helper function for validateOrder   
-let toValidatedOrderLine checkProductExists (unvalidatedOrderLine:UnvalidatedOrderLine) = 
+let toValidatedOrderLine checkProductExists (unvalidatedOrderLine: UnvalidatedOrderLine) = 
     result {
         let! orderLineId = 
             unvalidatedOrderLine.OrderLineId 
@@ -245,7 +241,7 @@ let toValidatedOrderLine checkProductExists (unvalidatedOrderLine:UnvalidatedOrd
         return validatedOrderLine 
     }
 
-let validateOrder : ValidateOrder = 
+let validateOrder :ValidateOrder = 
     fun checkProductCodeExists checkAddressExists unvalidatedOrder ->
         asyncResult {
             let! orderId = 
@@ -275,6 +271,7 @@ let validateOrder : ValidateOrder =
                     |> List.map (toValidatedOrderLine checkProductCodeExists) 
                     |> Result.sequence // convert list of Results to a single Result
                     |> AsyncResult.ofResult
+                    
             let validatedOrder : ValidatedOrder = {
                 OrderId  = orderId 
                 CustomerInfo = customerInfo 
@@ -285,11 +282,10 @@ let validateOrder : ValidateOrder =
             return validatedOrder 
         }
 
-// ---------------------------
-// PriceOrder step
-// ---------------------------
+//_____________________________________________________________________________
+//                 Imlementation                           2.2 PriceOrder step
 
-let toPricedOrderLine (getProductPrice:GetProductPrice) (validatedOrderLine:ValidatedOrderLine) = 
+let toPricedOrderLine (getProductPrice: GetProductPrice) (validatedOrderLine: ValidatedOrderLine) = 
     result {
         let qty = validatedOrderLine.Quantity |> OrderQuantity.value 
         let price = validatedOrderLine.ProductCode |> getProductPrice 
@@ -305,7 +301,7 @@ let toPricedOrderLine (getProductPrice:GetProductPrice) (validatedOrderLine:Vali
         return pricedLine
     }
 
-let priceOrder : PriceOrder = 
+let priceOrder :PriceOrder = 
     fun getProductPrice validatedOrder ->
         result {
             let! lines = 
@@ -328,19 +324,16 @@ let priceOrder : PriceOrder =
             return pricedOrder 
         }
         
+//_____________________________________________________________________________
+//                 Imlementation                     2.3 AcknowledgeOrder step
 
-// ---------------------------
-// AcknowledgeOrder step
-// ---------------------------
-
-let acknowledgeOrder : AcknowledgeOrder = 
+let acknowledgeOrder :AcknowledgeOrder = 
     fun createAcknowledgmentLetter sendAcknowledgment pricedOrder ->
         let letter = createAcknowledgmentLetter pricedOrder
         let acknowledgment = {
             EmailAddress = pricedOrder.CustomerInfo.EmailAddress
             Letter = letter 
             }
-
         // if the acknowledgement was successfully sent,
         // return the corresponding event, else return None
         match sendAcknowledgment acknowledgment with
@@ -353,14 +346,13 @@ let acknowledgeOrder : AcknowledgeOrder =
         | NotSent ->
             None
 
-// ---------------------------
-// Create events
-// ---------------------------
+//_____________________________________________________________________________
+//                 Imlementation                             2.4 Create events
 
-let createOrderPlacedEvent (placedOrder:PricedOrder) : OrderPlaced =
+let createOrderPlacedEvent (placedOrder: PricedOrder) :OrderPlaced =
     placedOrder
  
-let createBillingEvent (placedOrder:PricedOrder) : BillableOrderPlaced option =
+let createBillingEvent (placedOrder:PricedOrder) :BillableOrderPlaced option =
     let billingAmount = placedOrder.AmountToBill |> BillingAmount.value
     if billingAmount > 0M then
         {
@@ -371,13 +363,13 @@ let createBillingEvent (placedOrder:PricedOrder) : BillableOrderPlaced option =
     else
         None
 
-/// helper to convert an Option into a List
+/// Helper to convert an Option into a List
 let listOfOption opt =
     match opt with 
     | Some x -> [x]
-    | None -> []
+    | None   -> []
 
-let createEvents : CreateEvents = 
+let createEvents :CreateEvents = 
     fun pricedOrder acknowledgmentEventOpt ->
         let acknowledgmentEvents = 
             acknowledgmentEventOpt 
@@ -401,9 +393,9 @@ let createEvents : CreateEvents =
         yield! billingEvents
         ]            
 
-// ---------------------------
-// overall workflow
-// ---------------------------
+// ======================================================
+// Overall workflow implementation
+// ======================================================
 
 let placeOrder 
     checkProductExists // dependency
@@ -411,7 +403,7 @@ let placeOrder
     getProductPrice    // dependency
     createOrderAcknowledgmentLetter  // dependency
     sendOrderAcknowledgment          // dependency
-    : PlaceOrder =                   // definition of function
+    :PlaceOrder =                    // definition of function (see public API)
 
     fun unvalidatedOrder -> 
         asyncResult {

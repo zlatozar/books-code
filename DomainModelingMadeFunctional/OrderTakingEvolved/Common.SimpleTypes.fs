@@ -5,11 +5,10 @@ namespace OrderTaking.Common
 
 open System
 
-// ===============================
+// THE SAME AS PREVIOUS VERSION only ZIP, VIP types are added
+
 // Simple types and constrained types related to the OrderTaking domain.
-//
 // E.g. Single case discriminated unions (aka wrappers), enums, etc
-// ===============================
 
 /// Constrained to be 50 chars or less, not null
 type String50 = private String50 of string
@@ -70,9 +69,7 @@ type PdfAttachment = {
 
 type PromotionCode = PromotionCode of string
 
-// ===============================
 // Reusable constructors and getters for constrained types
-// ===============================
 
 /// Useful functions for constrained types
 module ConstrainedType =
@@ -165,6 +162,8 @@ module EmailAddress =
     let create fieldName str = 
         let pattern = ".+@.+" // anything separated by an "@"
         ConstrainedType.createLike fieldName EmailAddress pattern str
+
+// NEW types
 
 module VipStatus =
 

@@ -1,5 +1,6 @@
 ﻿module internal OrderTaking.PlaceOrder.ImplementationWithoutEffects
 
+// version 1 (simplified)
 open OrderTaking.Common
 
 // This file contains the implementation for the PlaceOrder workflow
@@ -12,21 +13,19 @@ open OrderTaking.Common
 // * the second section contains the implementations for each step
 //   and the implementation of the overall workflow
 
-//_________________________________________________________________________
-//                                    the workflow itself, without effects
-
-type PlaceOrderWithoutEffects = 
-    UnvalidatedOrder -> PlaceOrderEvent list
-    
 // ======================================================
-// Override the SimpleType constructors 
-// so that they raise exceptions rather than return Results
+// ATTENTION! Implementation is simplified:
+//            Override the SimpleType constructors so that
+//            they raise exceptions rather than return Results
 // ======================================================
 
-// helper to convert Results into exceptions so we can reuse the smart constructors in SimpleTypes.
+//_____________________________________________________________________________
+//                                                              Simplification
+
+/// Helper to convert Results into exceptions so we can reuse the smart constructors in SimpleTypes
 let failOnError aResult =
     match aResult with
-    | Ok success -> success 
+    | Ok success  -> success 
     | Error error -> failwithf "%A" error
 
 module String50 =
@@ -72,19 +71,18 @@ module BillingAmount =
     let sumPrices = BillingAmount.sumPrices >> failOnError
 
 // ======================================================
-// Section 1 : Define each step in the workflow using types
+// Section 1 : Define each step in the workflow using just types
 // ======================================================
 
-// ---------------------------
-// Validation step
-// ---------------------------
+//_____________________________________________________________________________
+//                 Types                                   1.1 Validation step
 
-// Product validation
+// 1.1.1 Product validation
 
 type CheckProductCodeExists = 
     ProductCode -> bool
 
-// Address validation exception
+// 1.1.2 Address validation exception
 exception AddressValidationFailure of string
 
 type CheckedAddress = CheckedAddress of UnvalidatedAddress
@@ -92,9 +90,7 @@ type CheckedAddress = CheckedAddress of UnvalidatedAddress
 type CheckAddressExists = 
     UnvalidatedAddress -> CheckedAddress
 
-// ---------------------------
-// Validated Order 
-// ---------------------------
+// 1.1.3 Validated Order 
 
 type ValidatedOrderLine =  {
     OrderLineId : OrderLineId 
@@ -110,29 +106,29 @@ type ValidatedOrder = {
     Lines : ValidatedOrderLine list
     }
 
+// 1.1.3 Implemetation
+
 type ValidateOrder = 
     CheckProductCodeExists  // dependency
       -> CheckAddressExists // dependency
       -> UnvalidatedOrder   // input
       -> ValidatedOrder     // output
 
-// ---------------------------
-// Pricing step
-// ---------------------------
+//_____________________________________________________________________________
+//                 Types                                      1.2 Pricing step
 
 type GetProductPrice = 
     ProductCode -> Price
 
-// priced state is defined Domain.WorkflowTypes
+// Implemetation
 
 type PriceOrder = 
     GetProductPrice     // dependency
       -> ValidatedOrder // input
       -> PricedOrder    // output
 
-// ---------------------------
-// Send OrderAcknowledgment 
-// ---------------------------
+//_____________________________________________________________________________
+//                 Types                          1.3 Send OrderAcknowledgment 
 
 type HtmlString = 
     HtmlString of string
@@ -142,43 +138,47 @@ type OrderAcknowledgment = {
     Letter : HtmlString 
     }
 
+// Implemetation
+
 type CreateOrderAcknowledgmentLetter =
     PricedOrder -> HtmlString
 
+//_____________________________________________________________________________
+//                 Types    1.4 Send the order acknowledgement to the customer
+
 /// Send the order acknowledgement to the customer
 /// Note that this does NOT generate an Result-type error (at least not in this workflow)
-/// because on failure we will continue anyway.
-/// On success, we will generate a OrderAcknowledgmentSent event,
-/// but on failure we won't.
-
+/// because on failure we will continue anyway. On success, we will generate
+/// a OrderAcknowledgmentSent event, but on failure we won't.
 type SendResult = Sent | NotSent
 
 type SendOrderAcknowledgment =
     OrderAcknowledgment -> SendResult 
     
+// Implemetation
+
 type AcknowledgeOrder = 
     CreateOrderAcknowledgmentLetter  // dependency
      -> SendOrderAcknowledgment      // dependency
      -> PricedOrder                    // input
      -> OrderAcknowledgmentSent option // output
 
-// ---------------------------
-// Create events
-// ---------------------------
+//_____________________________________________________________________________
+//                 Types                                     1.5 Create events
+
+// Implemetation
 
 type CreateEvents = 
     PricedOrder                           // input
      -> OrderAcknowledgmentSent option    // input (event from previous step)
      -> PlaceOrderEvent list              // output
 
-
 // ======================================================
-// Section 2 : Implementation
+// Section 2 : Implementation of dependencies
 // ======================================================
 
-// ---------------------------
-// ValidateOrder step
-// ---------------------------
+//_____________________________________________________________________________
+//                 Imlementation                        2.1 ValidateOrder step
 
 let toCustomerInfo (unvalidatedCustomerInfo: UnvalidatedCustomerInfo) =
     let firstName = 
@@ -196,7 +196,7 @@ let toCustomerInfo (unvalidatedCustomerInfo: UnvalidatedCustomerInfo) =
         }
     customerInfo 
 
-let toAddress (checkAddressExists:CheckAddressExists) unvalidatedAddress =
+let toAddress (checkAddressExists: CheckAddressExists) unvalidatedAddress =
     // call the remote service
     let checkedAddress = checkAddressExists unvalidatedAddress 
     // extract the inner value using pattern matching
@@ -238,22 +238,19 @@ let predicateToPassthru errorMsg f x =
         failwith errorMsg
 
 /// Helper function for validateOrder   
-let toProductCode (checkProductCodeExists:CheckProductCodeExists) productCode = 
-
+let toProductCode (checkProductCodeExists: CheckProductCodeExists) productCode = 
     // create a ProductCode -> ProductCode function 
     // suitable for using in a pipeline
     let checkProduct productCode = 
         let errorMsg = sprintf "Invalid: %A" productCode 
         predicateToPassthru errorMsg checkProductCodeExists productCode
-        
     // assemble the pipeline        
     productCode
         |> ProductCode.create "ProductCode"
         |> checkProduct 
 
-   
 /// Helper function for validateOrder   
-let toValidatedOrderLine checkProductExists (unvalidatedOrderLine:UnvalidatedOrderLine) = 
+let toValidatedOrderLine checkProductExists (unvalidatedOrderLine: UnvalidatedOrderLine) = 
     let orderLineId = 
         unvalidatedOrderLine.OrderLineId 
             |> OrderLineId.create "OrderLineId" 
@@ -270,7 +267,7 @@ let toValidatedOrderLine checkProductExists (unvalidatedOrderLine:UnvalidatedOrd
         }
     validatedOrderLine 
 
-let validateOrder : ValidateOrder = 
+let validateOrder :ValidateOrder = 
     fun checkProductCodeExists checkAddressExists unvalidatedOrder ->
         let orderId = 
             unvalidatedOrder.OrderId 
@@ -296,9 +293,8 @@ let validateOrder : ValidateOrder =
         }
         validatedOrder 
 
-// ---------------------------
-// PriceOrder step
-// ---------------------------
+//_____________________________________________________________________________
+//                 Imlementation                           2.2 PriceOrder step
 
 let toPricedOrderLine (getProductPrice:GetProductPrice) (validatedOrderLine:ValidatedOrderLine) = 
     let qty = validatedOrderLine.Quantity |> OrderQuantity.value 
@@ -312,7 +308,7 @@ let toPricedOrderLine (getProductPrice:GetProductPrice) (validatedOrderLine:Vali
         }
     pricedLine
 
-let priceOrder : PriceOrder = 
+let priceOrder :PriceOrder = 
     fun getProductPrice validatedOrder ->
         let lines = 
             validatedOrder.Lines 
@@ -331,18 +327,16 @@ let priceOrder : PriceOrder =
             }
         pricedOrder 
         
-// ---------------------------
-// AcknowledgeOrder step
-// ---------------------------
+//_____________________________________________________________________________
+//                 Imlementation                     2.3 AcknowledgeOrder step
 
-let acknowledgeOrder : AcknowledgeOrder = 
+let acknowledgeOrder :AcknowledgeOrder = 
     fun createAcknowledgmentLetter sendAcknowledgment pricedOrder ->
         let letter = createAcknowledgmentLetter pricedOrder
         let acknowledgment = {
             EmailAddress = pricedOrder.CustomerInfo.EmailAddress
             Letter = letter 
             }
-
         // if the acknowledgement was successfully sent,
         // return the corresponding event, else return None
         match sendAcknowledgment acknowledgment with
@@ -355,14 +349,13 @@ let acknowledgeOrder : AcknowledgeOrder =
         | NotSent ->
             None
 
-// ---------------------------
-// Create events
-// ---------------------------
+//_____________________________________________________________________________
+//                 Imlementation                             2.4 Create events
 
-let createOrderPlacedEvent (placedOrder:PricedOrder) =
+let createOrderPlacedEvent (placedOrder: PricedOrder) =
     placedOrder
 
-let createBillingEvent (placedOrder:PricedOrder) : BillableOrderPlaced option =
+let createBillingEvent (placedOrder: PricedOrder) :BillableOrderPlaced option =
     let billingAmount = placedOrder.AmountToBill |> BillingAmount.value
     if billingAmount > 0M then
         {
@@ -373,13 +366,13 @@ let createBillingEvent (placedOrder:PricedOrder) : BillableOrderPlaced option =
     else
         None
 
-/// helper to convert an Option into a List
+/// Helper to convert an Option into a List
 let listOfOption opt =
     match opt with 
     | Some x -> [x]
-    | None -> []
+    | None   -> []
 
-let createEvents : CreateEvents = 
+let createEvents :CreateEvents = 
     fun pricedOrder acknowledgmentEventOpt ->
         let acknowledgmentEvents = 
             acknowledgmentEventOpt 
@@ -403,17 +396,20 @@ let createEvents : CreateEvents =
         yield! billingEvents
         ]            
 
-// ---------------------------
-// overall workflow
-// ---------------------------
+// ======================================================
+// Overall workflow implementation
+// ======================================================
 
+type PlaceOrderWithoutEffects = 
+    UnvalidatedOrder -> PlaceOrderEvent list
+    
 let placeOrder 
     checkProductExists // dependency
     checkAddressExists // dependency
     getProductPrice    // dependency
     createOrderAcknowledgmentLetter  // dependency
     sendOrderAcknowledgment          // dependency
-    : PlaceOrderWithoutEffects =     // definition of function
+    :PlaceOrderWithoutEffects =      // definition of function
 
     fun unvalidatedOrder -> 
         let validatedOrder = 

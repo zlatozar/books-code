@@ -28,11 +28,8 @@ type HttpResponse = {
 /// An API takes a HttpRequest as input and returns a async response
 type PlaceOrderApi = HttpRequest -> Async<HttpResponse>
 
-// =============================
-// Implementation
-// =============================
-
-// setup dummy dependencies            
+//_____________________________________________________________________________
+//     Implementation                                Simulat Dependency(dymmy)
 
 let checkProductExists :Implementation.CheckProductCodeExists =
     fun productCode -> 
@@ -56,9 +53,8 @@ let sendOrderAcknowledgment :Implementation.SendOrderAcknowledgment =
     fun orderAcknowledgement ->
         Implementation.Sent 
         
-// -------------------------------
-// workflow
-// -------------------------------
+//_____________________________________________________________________________
+//     Implementation                                                 Workflow
 
 /// This function converts the workflow output into a HttpResponse
 let workflowResultToHttpReponse result = 
@@ -102,9 +98,9 @@ let placeOrderApi :PlaceOrderApi =
         // setup the dependencies. See "Injecting Dependencies" in chapter 9
         let workflow = 
             Implementation.placeOrder 
-                checkProductExists // dependency
-                checkAddressExists // dependency
-                getProductPrice    // dependency
+                checkProductExists  // dependency
+                checkAddressExists  // dependency
+                getProductPrice     // dependency
                 createOrderAcknowledgmentLetter  // dependency
                 sendOrderAcknowledgment          // dependency
 

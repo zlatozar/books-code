@@ -1,4 +1,4 @@
-﻿module internal OrderTaking.PlaceOrder.InternalTypes
+﻿module internal OrderTaking.PlaceOrder. InternalTypes
 
 open OrderTaking.Common
 
@@ -164,8 +164,8 @@ type SendOrderAcknowledgment =
     OrderAcknowledgment -> SendResult 
     
 type AcknowledgeOrder = 
-    CreateOrderAcknowledgmentLetter  // dependency
-     -> SendOrderAcknowledgment      // dependency
+    CreateOrderAcknowledgmentLetter    // dependency
+     -> SendOrderAcknowledgment        // dependency
      -> PricedOrderWithShippingMethod  // input
      -> OrderAcknowledgmentSent option // output
 
@@ -174,6 +174,6 @@ type AcknowledgeOrder =
 // ---------------------------
 
 type CreateEvents = 
-    PricedOrder                           // input
-     -> OrderAcknowledgmentSent option    // input (event from previous step)
-     -> PlaceOrderEvent list              // output
+    PricedOrder                         // input
+     -> OrderAcknowledgmentSent option  // input (event from previous step)
+     -> PlaceOrderEvent list            // output

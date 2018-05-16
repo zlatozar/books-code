@@ -3,13 +3,8 @@
 
 namespace OrderTaking.Common  
 
-// ==================================
 // Common compound types used throughout the OrderTaking domain
-//
 // Includes: customers, addresses, etc.
-// Plus common errors.
-//
-// ==================================
 
 // ==================================
 // Customer-related types
@@ -37,8 +32,8 @@ type Address = {
     AddressLine4 : String50 option
     City : String50
     ZipCode : ZipCode
-    State: UsStateCode
-    Country: String50
+    State: UsStateCode  // new
+    Country: String50   // new
     }
 
 // ==================================

@@ -1,12 +1,10 @@
 ﻿module OrderTaking.PlaceOrder.Api
 
-// ======================================================
 // This file contains the complete workflow, exposed as a JSON API
 //
 // 1) The HttpRequest is turned into a DTO, which is then turned into a Domain object
 // 2) The main workflow function is called
 // 3) The output is turned into a DTO which is turned into a HttpResponse
-// ======================================================
 
 open Newtonsoft.Json
 open OrderTaking.Common
@@ -30,11 +28,8 @@ type HttpResponse = {
 /// An API takes a HttpRequest as input and returns a async response
 type PlaceOrderApi = HttpRequest -> Async<HttpResponse>
 
-// =============================
-// Implementation
-// =============================
-
-// setup dummy dependencies            
+//_____________________________________________________________________________
+//     Implementation                                Simulat Dependency(dymmy)
 
 let checkProductExists :CheckProductCodeExists =
     fun productCode -> 
@@ -49,8 +44,9 @@ let getStandardPrices() :GetProductPrice =
     fun productCode -> 
         Price.unsafeCreate 10M 
 
-let getPromotionPrices (PromotionCode promotionCode) :TryGetProductPrice =
+// NEW
 
+let getPromotionPrices (PromotionCode promotionCode) :TryGetProductPrice =
     let halfPricePromotion : TryGetProductPrice = 
         fun productCode -> 
             if ProductCode.value productCode = "ONSALE" then
@@ -88,9 +84,8 @@ let sendOrderAcknowledgment :SendOrderAcknowledgment =
     fun orderAcknowledgement ->
         Sent 
         
-// -------------------------------
-// workflow
-// -------------------------------
+//_____________________________________________________________________________
+//     Implementation                                                 Workflow
 
 /// This function converts the workflow output into a HttpResponse
 let workflowResultToHttpReponse result = 
@@ -134,9 +129,9 @@ let placeOrderApi :PlaceOrderApi =
         // setup the dependencies. See "Injecting Dependencies" in chapter 9
         let workflow = 
             Implementation.placeOrder 
-                checkProductExists // dependency
-                checkAddressExists // dependency
-                getPricingFunction // dependency
+                checkProductExists  // dependency
+                checkAddressExists  // dependency
+                getPricingFunction  // dependency
                 calculateShippingCost            // dependency
                 createOrderAcknowledgmentLetter  // dependency
                 sendOrderAcknowledgment          // dependency

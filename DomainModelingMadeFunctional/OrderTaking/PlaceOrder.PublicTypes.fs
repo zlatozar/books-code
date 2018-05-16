@@ -5,13 +5,15 @@ namespace OrderTaking.PlaceOrder
 
 open OrderTaking.Common
 
-// ==================================
 // This file contains the definitions of PUBLIC types (exposed at the boundary of the bounded context)
-// related to the PlaceOrder workflow 
+// related to the PlaceOrder workflow (also included)
+
+// ==================================
+// PlaceOrder workflow types
 // ==================================
 
-// ------------------------------------
-// inputs to the workflow
+//_____________________________________________________________________________
+//                                                      Inputs to the workflow
 
 type UnvalidatedCustomerInfo = {
     FirstName : string
@@ -28,7 +30,7 @@ type UnvalidatedAddress = {
     ZipCode : string
     }
 
-type UnvalidatedOrderLine =  {
+type UnvalidatedOrderLine = {
     OrderLineId : string
     ProductCode : string
     Quantity : decimal
@@ -42,9 +44,8 @@ type UnvalidatedOrder = {
     Lines : UnvalidatedOrderLine list
     }
 
-
 //_____________________________________________________________________________
-//                                    outputs from the workflow (success case)
+//                                    Outputs from the workflow (success case)
 
 /// Event will be created if the Acknowledgment was successfully posted
 type OrderAcknowledgmentSent = {
@@ -52,7 +53,8 @@ type OrderAcknowledgmentSent = {
     EmailAddress : EmailAddress 
     }
 
-// priced state            
+// Priced state        
+    
 type PricedOrderLine = {
     OrderLineId : OrderLineId 
     ProductCode : ProductCode 
@@ -88,7 +90,7 @@ type PlaceOrderEvent =
     | AcknowledgmentSent  of OrderAcknowledgmentSent
 
 //_____________________________________________________________________________
-//                                                               error outputs 
+//                                                               Error outputs 
 
 /// All the things that can go wrong in this workflow
 type ValidationError = ValidationError of string
@@ -110,9 +112,8 @@ type PlaceOrderError =
     | Pricing of PricingError 
     | RemoteService of RemoteServiceError 
 
-
 //_____________________________________________________________________________
-//                                                         the workflow itself
+//                        The workflow itself (version 2 of the implemenation)
 
 type PlaceOrder = 
     UnvalidatedOrder -> AsyncResult<PlaceOrderEvent list,PlaceOrderError>

@@ -12,27 +12,27 @@ module internal PricingModule =
 
     /// Create a pricing method given a promotionCode on the unvalidated order form
     /// If null -> Standard otherwise wrap in PromotionCode
-    let createPricingMethod (promotionCode:string) =
+    let createPricingMethod (promotionCode: string) =
         if String.IsNullOrWhiteSpace promotionCode then
             Standard
         else
             Promotion (PromotionCode promotionCode)
 
     let getPricingFunction 
-        (standardPrices:GetStandardPrices) 
-        (promoPrices:GetPromotionPrices)  
-        : GetPricingFunction = 
+        (standardPrices: GetStandardPrices) 
+        (promoPrices: GetPromotionPrices)  
+        :GetPricingFunction = 
   
 
         // the original pricing function
-        let getStandardPrice : GetProductPrice =
+        let getStandardPrice :GetProductPrice =
             // cache the standard prices		
             let getStandardPrices = standardPrices()
             // return the lookup function
             getStandardPrices 
 
         // the promotional pricing function
-        let getPromotionPrice promotionCode : GetProductPrice =
+        let getPromotionPrice promotionCode :GetProductPrice =
             // cache the promotional prices
             let getPromotionPrice = promoPrices promotionCode
             

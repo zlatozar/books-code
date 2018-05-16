@@ -5,17 +5,15 @@ namespace OrderTaking.PlaceOrder
 
 open OrderTaking.Common
 
-// ==================================
 // This file contains the definitions of PUBLIC types (exposed at the boundary of the bounded context)
 // related to the PlaceOrder workflow 
-// ==================================
 
 // ==================================
-// PlaceOrder workflow
+// PlaceOrder workflow types
 // ==================================
 
 //_________________________________________________________________________
-//                                                 inputs to the workflow
+//                                                 Inputs to the workflow
 
 type UnvalidatedCustomerInfo = {
     FirstName : string
@@ -51,7 +49,7 @@ type UnvalidatedOrder = {
     }
     
 //_________________________________________________________________________
-//                                outputs from the workflow (success case)
+//                                Outputs from the workflow (success case)
 
 /// Event will be created if the Acknowledgment was successfully posted
 type OrderAcknowledgmentSent = {
@@ -90,7 +88,7 @@ type PlaceOrderEvent =
     | AcknowledgmentSent  of OrderAcknowledgmentSent
     
 //_________________________________________________________________________
-//                                                           error outputs 
+//                                                           Error outputs 
 
 /// All the things that can go wrong in this workflow
 type ValidationError = ValidationError of string
@@ -113,7 +111,7 @@ type PlaceOrderError =
     | RemoteService of RemoteServiceError 
 
 //_________________________________________________________________________
-//                                                     the workflow itself
+//                                                     The workflow itself
 
 type PlaceOrder = 
     UnvalidatedOrder -> AsyncResult<PlaceOrderEvent list,PlaceOrderError>

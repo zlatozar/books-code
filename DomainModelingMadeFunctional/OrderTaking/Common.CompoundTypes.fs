@@ -3,13 +3,8 @@
 
 namespace OrderTaking.Common  
 
-// ==================================
 // Common compound types used throughout the OrderTaking domain
-//
 // Includes: customers, addresses, etc.
-// Plus common errors.
-//
-// ==================================
 
 // ==================================
 // Customer-related types

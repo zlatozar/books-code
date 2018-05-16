@@ -5,11 +5,8 @@ namespace OrderTaking.Common
 
 open System
 
-// ===============================
 // Simple types and constrained types related to the OrderTaking domain.
-//
 // E.g. Single case discriminated unions (aka wrappers), enums, etc
-// ===============================
 
 /// Constrained to be 50 chars or less, not null
 type String50 = private String50 of string
@@ -60,9 +57,7 @@ type PdfAttachment = {
     Bytes: byte[]
     }
 
-// ===============================
 // Reusable constructors and getters for constrained types
-// ===============================
 
 /// Useful functions for constrained types
 module ConstrainedType =
@@ -269,11 +264,11 @@ module OrderQuantity  =
     let create fieldName productCode quantity  = 
         match productCode with
         | Widget _ -> 
-            UnitQuantity.create fieldName (int quantity) // convert float to int 
-            |> Result.map OrderQuantity.Unit             // lift to OrderQuantity type
+            UnitQuantity.create fieldName (int quantity)  // convert float to int 
+                |> Result.map OrderQuantity.Unit          // lift to OrderQuantity type
         | Gizmo _ -> 
             KilogramQuantity.create fieldName quantity 
-            |> Result.map OrderQuantity.Kilogram         // lift to OrderQuantity type
+                |> Result.map OrderQuantity.Kilogram      // lift to OrderQuantity type
 
 module Price =
 

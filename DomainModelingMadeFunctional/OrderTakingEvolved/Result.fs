@@ -1,4 +1,6 @@
-﻿namespace global  // note use of GLOBAL namespace
+﻿namespace global  // NOTE: use of GLOBAL namespace
+
+// THE SAME AS IN PREVIOUS VERION
 
 //==============================================
 // Helpers for Result type and AsyncResult type
@@ -6,7 +8,7 @@
 
 /// Functions for Result type (functor and monad).
 /// For applicatives, see Validation.
-[<RequireQualifiedAccess>]  // forces the `Result.xxx` prefix to be used
+[<RequireQualifiedAccess>]
 module Result =
 
     /// Pass in a function to handle each case of `Result`
@@ -15,6 +17,7 @@ module Result =
         | Ok x      -> onSuccess x
         | Error err -> onError err
 
+    // use `Result` from FSharpCore - create aliases
     let map = Result.map
     let mapError = Result.mapError
     let bind = Result.bind
@@ -127,10 +130,7 @@ module Result =
         | Ok _      -> None
         | Error err -> Some err
 
-//==============================================
-// Computation Expression for Result
-//==============================================
-
+/// Computation Expression for Result
 [<AutoOpen>]
 module ResultComputationExpression =
 
@@ -148,7 +148,7 @@ module ResultComputationExpression =
             if not (guard()) 
             then this.Zero() 
             else this.Bind( body(), fun () -> 
-                this.While(guard, body))  
+                                        this.While(guard, body))  
 
         member this.TryWith(body, handler) =
             try this.ReturnFrom(body())
@@ -161,9 +161,9 @@ module ResultComputationExpression =
         member this.Using(disposable:#System.IDisposable, body) =
             let body' = fun () -> body disposable
             this.TryFinally(body', fun () -> 
-                match disposable with 
-                | null -> () 
-                | disp -> disp.Dispose())
+                                        match disposable with 
+                                        | null -> () 
+                                        | disp -> disp.Dispose())
 
         member this.For(sequence:seq<_>, body) =
             this.Using(sequence.GetEnumerator(),fun enum -> 
@@ -175,17 +175,16 @@ module ResultComputationExpression =
 
     let result = new ResultBuilder()
 
-//==============================================
+// NOTE:
 // The `Validation` type is the same as the `Result` type but with a *list* for failures
 // rather than a single value. This allows `Validation` types to be combined
 // by combining their errors ("applicative-style")
-//==============================================
 
 type Validation<'Success,'Failure> = 
     Result<'Success,'Failure list>
 
 /// Functions for the `Validation` type (mostly applicative)
-[<RequireQualifiedAccess>]  // forces the `Validation.xxx` prefix to be used
+[<RequireQualifiedAccess>]
 module Validation =
 
     /// Apply a Validation<fn> to a Validation<x> applicatively
@@ -217,11 +216,8 @@ module Validation =
     let toResult (xV: Validation<_,_>) :Result<_,_> = 
         xV
 
-//==============================================
-// Async utilities
-//==============================================
-
-[<RequireQualifiedAccess>]  // forces the `Async.xxx` prefix to be used
+/// Async utilities
+[<RequireQualifiedAccess>]
 module Async =
 
     /// Lift a function to Async
@@ -257,7 +253,7 @@ module Async =
 type AsyncResult<'Success,'Failure> = 
     Async<Result<'Success,'Failure>>
 
-[<RequireQualifiedAccess>]  // forces the `AsyncResult.xxx` prefix to be used
+[<RequireQualifiedAccess>]
 module AsyncResult =
 
     /// Lift a function to AsyncResult
@@ -360,10 +356,6 @@ module AsyncResult =
     let sleep ms = 
         Async.Sleep ms |> ofAsync
             
-// ==================================
-// AsyncResult computation expression
-// ==================================
-
 /// The `asyncResult` computation expression is available globally without qualification
 [<AutoOpen>]
 module AsyncResultComputationExpression = 
@@ -381,8 +373,7 @@ module AsyncResultComputationExpression =
         member this.While(guard, body) =
             if not (guard()) 
             then this.Zero() 
-            else this.Bind( body(), fun () -> 
-                this.While(guard, body))  
+            else this.Bind( body(), fun () -> this.While(guard, body))  
 
         member this.TryWith(body, handler) =
             try this.ReturnFrom(body())
