@@ -5,7 +5,7 @@ open OrderTaking.Common
 
 // This file contains the final implementation for the PlaceOrder workflow
 //
-// This represents the code in chapter 10, "Working with Errors"
+// This represents the code in Chapter 10, "Working with Errors"
 //
 // There are two parts:
 // * the first section contains the (type-only) definitions for each step
@@ -25,6 +25,7 @@ type CheckProductCodeExists =
     ProductCode -> bool
 
 // 1.1.2 Address validation exception
+
 type AddressValidationError = 
     | InvalidFormat 
     | AddressNotFound 

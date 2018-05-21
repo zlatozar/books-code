@@ -1,5 +1,7 @@
 ﻿namespace OrderTaking.PlaceOrder
 
+// NEW
+
 // Move all pricing logic into its own module,
 // as it will likely get complicated!
 
@@ -7,7 +9,7 @@ open System
 open OrderTaking.Common
 open OrderTaking.PlaceOrder.InternalTypes
 
-/// An internal helper module to help with pricing
+/// An internal *helper* module to help with pricing
 module internal PricingModule = 
 
     /// Create a pricing method given a promotionCode on the unvalidated order form

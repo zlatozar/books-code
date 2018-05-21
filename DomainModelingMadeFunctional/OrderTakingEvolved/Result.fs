@@ -34,7 +34,6 @@ module Result =
         | Ok _, Error err2    -> Error err2
         | Error err1, Error _ -> Error err1 
 
-
     // combine a list of results, monadically
     let sequence aListOfResults = 
         let (<*>) = apply // monadic
@@ -48,7 +47,7 @@ module Result =
         List.foldBack consR aListOfResults initialValue
 
     //_________________________________________________________________________
-    //                                                                 Lifting
+    //                                                     Lifting (a.k.a map)
 
     /// Lift a two parameter function to use Result parameters
     let lift2 f x1 x2 = 
@@ -175,6 +174,10 @@ module ResultComputationExpression =
 
     let result = new ResultBuilder()
 
+//==============================================
+// Helpers for Validation type and AsyncResult type
+//==============================================
+
 // NOTE:
 // The `Validation` type is the same as the `Result` type but with a *list* for failures
 // rather than a single value. This allows `Validation` types to be combined
@@ -215,6 +218,10 @@ module Validation =
 
     let toResult (xV: Validation<_,_>) :Result<_,_> = 
         xV
+
+//==============================================
+// Helpers for AsyncResul
+//==============================================
 
 /// Async utilities
 [<RequireQualifiedAccess>]

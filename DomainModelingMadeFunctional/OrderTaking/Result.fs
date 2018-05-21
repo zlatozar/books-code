@@ -9,7 +9,14 @@ open System
 /// Functions for Result type (functor and monad).
 /// For applicatives, see Validation.
 [<RequireQualifiedAccess>]
-module Result =
+module Result =               // extend FSharpCore Result module
+
+    // TIP: When I'm trying to determine which function to use I find it helpful
+    // to think about which (if any) context my input is in and what I want to return.
+    // 
+    // If my input is in a context and my function knows nothing about contexts then map works.
+    // If my input is in a context and my function also returns a context I typically want bind to keep from being in a doubly nested context.
+    // And if I am trying to pass an argument to a function that's in a context, apply will do that job for me, even if I have to define it myself.
 
     /// Pass in a function to handle each case of `Result`
     let bimap onSuccess onError xR = 
@@ -50,7 +57,7 @@ module Result =
         List.foldBack consR aListOfResults initialValue
 
     //_________________________________________________________________________
-    //                                                                 Lifting
+    //                                                     Lifting (a.k.a map)
 
     /// Lift a two parameter function to use Result parameters
     let lift2 f x1 x2 = 
@@ -181,6 +188,10 @@ module ResultComputationExpression =
 
     let result = new ResultBuilder()
 
+//==============================================
+// Helpers for Validation type and AsyncResult type
+//==============================================
+
 // NOTE:
 // The `Validation` type is the same as the `Result` type but with a *list* for failures
 // rather than a single value. This allows `Validation` types to be combined
@@ -222,6 +233,10 @@ module Validation =
     let toResult (xV: Validation<_,_>) :Result<_,_> = 
         xV
         
+//==============================================
+// Helpers for AsyncResul
+//==============================================
+
 /// Async utilities
 [<RequireQualifiedAccess>]
 module Async =

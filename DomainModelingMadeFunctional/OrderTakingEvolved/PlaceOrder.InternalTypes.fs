@@ -1,34 +1,38 @@
-﻿module internal OrderTaking.PlaceOrder. InternalTypes
+﻿// Note that this module is internal
+module internal OrderTaking.PlaceOrder.InternalTypes
 
 open OrderTaking.Common
+
+// NEW
 
 // ======================================================
 // Define each step in the PlaceOrder workflow using internal types 
 // (not exposed outside the bounded context)
 // ======================================================
 
-// ---------------------------
-// Validation step
-// ---------------------------
+//_________________________________________________________________________
+//             Types                                 1. Validatаte Address
 
-// Product validation
+// 1.1 Product validation
 
 type CheckProductCodeExists = 
     ProductCode -> bool
 
-// Address validation
+// 1.2 Address validation
+
 type AddressValidationError = 
     | InvalidFormat 
     | AddressNotFound 
 
 type CheckedAddress = CheckedAddress of UnvalidatedAddress
 
+// 1.3 Implemenation
+
 type CheckAddressExists = 
     UnvalidatedAddress -> AsyncResult<CheckedAddress,AddressValidationError>
 
-// ---------------------------
-// Validated Order 
-// ---------------------------
+//_________________________________________________________________________
+//             Types                                    2. Validated Order 
 
 type PricingMethod =
     | Standard
@@ -49,15 +53,16 @@ type ValidatedOrder = {
     PricingMethod : PricingMethod
     }
 
+// Implementation
+
 type ValidateOrder = 
     CheckProductCodeExists  // dependency
      -> CheckAddressExists  // dependency
      -> UnvalidatedOrder    // input
      -> AsyncResult<ValidatedOrder, ValidationError> // output
 
-// ---------------------------
-// Pricing step
-// ---------------------------
+//_________________________________________________________________________
+//             Types                                       3. Pricing step
 
 type GetProductPrice = 
     ProductCode -> Price
@@ -75,7 +80,8 @@ type GetPromotionPrices =
     // promo input -> return prices for promo, maybe
     PromotionCode -> TryGetProductPrice 
 
-// priced state            
+// Priced state     
+       
 type PricedOrderProductLine = {
     OrderLineId : OrderLineId 
     ProductCode : ProductCode 
@@ -97,14 +103,15 @@ type PricedOrder = {
     PricingMethod : PricingMethod
     }
 
+// Implementation
+
 type PriceOrder = 
-    GetPricingFunction     // dependency
-     -> ValidatedOrder     // input
+    GetPricingFunction  // dependency
+     -> ValidatedOrder  // input
      -> Result<PricedOrder, PricingError>  // output
 
-// ---------------------------
-// Shipping
-// ---------------------------
+//_________________________________________________________________________
+//             Types                                           4. Shipping
 
 type ShippingMethod = 
     | PostalService 
@@ -125,21 +132,23 @@ type PricedOrderWithShippingMethod = {
 type CalculateShippingCost = 
     PricedOrder -> Price
 
+// Implementation
+
 type AddShippingInfoToOrder = 
     CalculateShippingCost // dependency
      -> PricedOrder       // input
      -> PricedOrderWithShippingMethod  // output
 
-// ---------------------------
-// VIP shipping
-// ---------------------------
+//_________________________________________________________________________
+//             Types (new)                                 5. VIP shipping
+
+// Implemetation
 
 type FreeVipShipping =
     PricedOrderWithShippingMethod -> PricedOrderWithShippingMethod
 
-// ---------------------------
-// Send OrderAcknowledgment 
-// ---------------------------
+//_________________________________________________________________________
+//             Types                           6. Send OrderAcknowledgment 
 
 type HtmlString = 
     HtmlString of string
@@ -163,15 +172,18 @@ type SendResult = Sent | NotSent
 type SendOrderAcknowledgment =
     OrderAcknowledgment -> SendResult 
     
+// Implemetation
+
 type AcknowledgeOrder = 
     CreateOrderAcknowledgmentLetter    // dependency
      -> SendOrderAcknowledgment        // dependency
      -> PricedOrderWithShippingMethod  // input
      -> OrderAcknowledgmentSent option // output
 
-// ---------------------------
-// Create events
-// ---------------------------
+//_________________________________________________________________________
+//             Types                                      7. Create events
+
+// Implemetation
 
 type CreateEvents = 
     PricedOrder                         // input

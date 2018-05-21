@@ -3,6 +3,8 @@
 
 namespace OrderTaking.Common  
 
+// THE SAME AS PREVIOUS VERSION only few fields are added
+
 // Common compound types used throughout the OrderTaking domain
 // Includes: customers, addresses, etc.
 

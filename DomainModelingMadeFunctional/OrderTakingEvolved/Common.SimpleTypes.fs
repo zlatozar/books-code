@@ -7,7 +7,7 @@ open System
 
 // THE SAME AS PREVIOUS VERSION only ZIP, VIP types are added
 
-// Simple types and constrained types related to the OrderTaking domain.
+// Simple types (single case unions) and constrained types related to the OrderTaking domain.
 // E.g. Single case discriminated unions (aka wrappers), enums, etc
 
 /// Constrained to be 50 chars or less, not null

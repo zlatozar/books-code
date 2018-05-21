@@ -1,4 +1,5 @@
-﻿module internal OrderTaking.PlaceOrder.ImplementationWithoutEffects
+﻿// Note that module is internal we want to hide the implementation
+module internal OrderTaking.PlaceOrder.ImplementationWithoutEffects
 
 // version 1 (simplified)
 open OrderTaking.Common
@@ -6,7 +7,7 @@ open OrderTaking.Common
 // This file contains the implementation for the PlaceOrder workflow
 // WITHOUT any effects like Result or Async.
 //
-// This represents the code in chapter 9, "Composing a Pipeline"
+// This represents the code in Chapter 9, "Composing a Pipeline"
 //
 // There are two parts:
 // * the first section contains the (type-only) definitions for each step

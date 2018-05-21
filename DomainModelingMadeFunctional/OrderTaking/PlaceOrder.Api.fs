@@ -29,7 +29,7 @@ type HttpResponse = {
 type PlaceOrderApi = HttpRequest -> Async<HttpResponse>
 
 //_____________________________________________________________________________
-//     Implementation                                Simulat Dependency(dymmy)
+//     Implementation                                Simulate Dependency(dummy)
 
 let checkProductExists :Implementation.CheckProductCodeExists =
     fun productCode -> 
@@ -64,7 +64,7 @@ let workflowResultToHttpReponse result =
         let dtos = 
             events 
                 |> List.map PlaceOrderEventDto.fromDomain
-                |> List.toArray // arrays are JSON friendly
+                |> List.toArray // arrays are serialization/JSON friendly
         // and serialize to JSON
         let json = JsonConvert.SerializeObject(dtos)
         let response = 
@@ -77,7 +77,7 @@ let workflowResultToHttpReponse result =
         // turn domain errors into a DTO
         let dto = err |> PlaceOrderErrorDto.fromDomain
         // and serialize to JSON
-        let json = JsonConvert.SerializeObject(dto )
+        let json = JsonConvert.SerializeObject(dto)
         let response = 
             {
             HttpStatusCode = 401
@@ -87,7 +87,7 @@ let workflowResultToHttpReponse result =
 
 let placeOrderApi :PlaceOrderApi =
     fun request ->
-        // following the approach in "A Complete Serialization Pipeline" in chapter 11
+        // following the approach in "A Complete Serialization Pipeline" in Chapter 11
 
         // start with a string
         let orderFormJson = request.Body

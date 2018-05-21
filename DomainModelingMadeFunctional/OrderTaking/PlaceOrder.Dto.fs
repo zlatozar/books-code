@@ -5,15 +5,18 @@ open System.Collections.Generic
 open OrderTaking
 open OrderTaking.Common
 
-// This file contains the logic for working with data transfer objects (DTOs)
+// This file contains the types and logic for working with data transfer objects (DTOs)
 //
-// This represents the code in chapter 11, "Serialization"
+// This represents the code in Chapter 11, "Serialization". Actual serialization is in PlaceOrder.Api.
 //
 // Each type of DTO is defined using primitive, serializable types
 // and then there are `toDomain` and `fromDomain` functions defined for each DTO.
 
 // ==================================
 // DTOs for PlaceOrder workflow
+//
+// NOTE: Functions here are associated with the DTO type, not the domain type,
+//       because the domain should not know anything about DTOs!
 // ==================================
 
 [<AutoOpen>]
@@ -24,13 +27,15 @@ module internal Utils =
     let defaultIfNone defaultValue opt =
         match opt with
         | Some v -> v
-        | None -> defaultValue
+        | None   -> defaultValue
         // could also use
         // defaultArg opt defaultValue
 
 //===============================================
-// DTO for CustomerInfo
+// DTO type for CustomerInfo
 //===============================================
+
+// TIP: Use following naming convetion: fromXXX (allways succeeds), toXXX (could fail - return Result)
 
 type CustomerInfoDto = {
     FirstName : string
@@ -44,12 +49,10 @@ module internal CustomerInfoDto =
     /// Convert the DTO into a UnvalidatedCustomerInfo object.
     /// This always succeeds because there is no validation. 
     /// Used when importing an OrderForm from the outside world into the domain.
-    let toUnvalidatedCustomerInfo (dto:CustomerInfoDto) : UnvalidatedCustomerInfo =
-            
+    let toUnvalidatedCustomerInfo (dto: CustomerInfoDto) :UnvalidatedCustomerInfo =
         // sometimes it's helpful to use an explicit type annotation 
         // to avoid ambiguity between records with the same field names.
-        let domainObj : UnvalidatedCustomerInfo = {  
-
+        let domainObj: UnvalidatedCustomerInfo = {  
             // this is a simple 1:1 copy which always succeeds
             FirstName = dto.FirstName 
             LastName = dto.LastName 
@@ -58,7 +61,7 @@ module internal CustomerInfoDto =
         domainObj 
 
     /// Convert the DTO into a CustomerInfo object
-    /// Used when importing from the outside world into the domain, eg loading from a database
+    /// Used when importing from the outside world into the domain, eg. loading from a database
     let toCustomerInfo (dto: CustomerInfoDto) :Result<CustomerInfo,string> =
         result {
             // get each (validated) simple type from the DTO as a success or failure
@@ -69,8 +72,9 @@ module internal CustomerInfoDto =
             // combine the components to create the domain object
             let name = {FirstName = first; LastName = last}
             let info = {Name = name; EmailAddress = email}
+            
             return info
-            }
+        }
 
     /// Convert a CustomerInfo object into the corresponding DTO.
     /// Used when exporting from the domain to the outside world.
@@ -135,7 +139,7 @@ module internal AddressDto =
                 }
                 
             return address
-            }
+        }
 
     /// Convert a Address object into the corresponding DTO.
     /// Used when exporting from the domain to the outside world.
@@ -151,7 +155,7 @@ module internal AddressDto =
         }
 
 //===============================================
-// DTOs for OrderLines
+// DTO type for OrderLines
 //===============================================
 
 /// From the order form used as input
@@ -176,11 +180,11 @@ module internal OrderLineDto =
         }
 
 //===============================================
-// DTOs for PricedOrderLines
+// DTO type for PricedOrderLines
 //===============================================
 
 /// Used in the output of the workflow
-type PricedOrderLineDto =  {
+type PricedOrderLineDto = {
     OrderLineId : string
     ProductCode : string
     Quantity : decimal
@@ -200,7 +204,7 @@ module internal PricedOrderLineDto =
         }
 
 //===============================================
-// DTO for OrderForm
+// DTO type for OrderForm
 //===============================================
 
 type OrderFormDto = {
@@ -225,11 +229,9 @@ module internal OrderFormDto =
         Lines = dto.Lines |> List.map OrderLineDto.toUnvalidatedOrderLine
         }
 
-
 //===============================================
-// DTO for OrderPlaced event
+// DTO type for OrderPlaced event
 //===============================================
-
 
 /// Event to send to shipping context
 type OrderPlacedDto = {
@@ -256,7 +258,7 @@ module internal OrderPlacedDto =
         }
 
 //===============================================
-// DTO for BillableOrderPlaced event
+// DTO type for BillableOrderPlaced event
 //===============================================
 
 /// Event to send to billing context
@@ -265,7 +267,6 @@ type BillableOrderPlacedDto = {
     BillingAddress : AddressDto
     AmountToBill : decimal
     }
-
 
 module internal BillableOrderPlacedDto =
 
@@ -279,7 +280,7 @@ module internal BillableOrderPlacedDto =
         }
 
 //===============================================
-// DTO for OrderAcknowledgmentSent event
+// DTO type for OrderAcknowledgmentSent event
 //===============================================
 
 /// Event to send to other bounded contexts
@@ -300,34 +301,34 @@ module internal OrderAcknowledgmentSentDto =
         }
 
 //===============================================
-// DTO for PlaceOrderEvent
+// DTO type for PlaceOrderEvent
 //===============================================
 
 /// Use a dictionary representation of a PlaceOrderEvent, suitable for JSON
-/// See "Serializing Records and Choice Types Using Maps" in chapter 11
+/// See "Serializing Records and Choice Types Using Maps" in Chapter 11
 type PlaceOrderEventDto = IDictionary<string,obj> 
 
 module internal PlaceOrderEventDto = 
 
     /// Convert a PlaceOrderEvent into the corresponding DTO.
     /// Used when exporting from the domain to the outside world.
-    let fromDomain (domainObj:PlaceOrderEvent) :PlaceOrderEventDto = 
+    let fromDomain (domainObj: PlaceOrderEvent) :PlaceOrderEventDto = 
         match domainObj with
         | OrderPlaced orderPlaced ->
             let obj = orderPlaced |> OrderPlacedDto.fromDomain |> box // use "box" to cast into an object
             let key = "OrderPlaced"
-            [(key,obj)] |> dict
+            [(key, obj)] |> dict
         | BillableOrderPlaced billableOrderPlaced ->
             let obj = billableOrderPlaced |> BillableOrderPlacedDto.fromDomain |> box
             let key = "BillableOrderPlaced"
-            [(key,obj)] |> dict
+            [(key, obj)] |> dict
         | AcknowledgmentSent orderAcknowledgmentSent ->
             let obj = orderAcknowledgmentSent |> OrderAcknowledgmentSentDto.fromDomain |> box
             let key = "OrderAcknowledgmentSent"
-            [(key,obj)] |> dict
+            [(key, obj)] |> dict
 
 //===============================================
-// DTO for PlaceOrderError
+// DTO type for PlaceOrderError
 //===============================================
 
 type PlaceOrderErrorDto = {
