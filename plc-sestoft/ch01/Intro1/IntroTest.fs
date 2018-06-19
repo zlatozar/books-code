@@ -8,6 +8,8 @@ module Intro1Test =
 
     open Intro1
 
+    // Evaluate without environment
+
     [<Fact>]
     let ``Evaluate constant`` () =
         eval (CstI 17) |> should equal 17

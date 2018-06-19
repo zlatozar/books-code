@@ -27,3 +27,7 @@ module Intro2 =
         | Prim("*", e1, e2) -> eval e1 env * eval e2 env
         | Prim("-", e1, e2) -> eval e1 env - eval e2 env
         | Prim _            -> failwith "unknown primitive"
+
+    let emptyenv = []
+
+    let run e = eval e emptyenv

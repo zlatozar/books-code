@@ -9,7 +9,6 @@ module Intro2Test =
     open Intro2
 
     let env = [("a", 3); ("c", 78); ("baf", 666); ("b", 111)]
-    let emptyenv = []
 
     [<Fact>]
     let ``Lookup variable`` () =

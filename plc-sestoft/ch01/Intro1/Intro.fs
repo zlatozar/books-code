@@ -10,6 +10,7 @@ module Intro1 =
 
     (* Evaluating expressions using recursive functions *)
 
+    // Note that no environment is passed
     let rec eval (e: Expr) :int =
         match e with
         | CstI i            -> i

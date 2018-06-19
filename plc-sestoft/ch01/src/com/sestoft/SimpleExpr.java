@@ -1,3 +1,5 @@
+package com.sestoft;
+
 // File Intro/SimpleExpr.java
 // Java representation of expressions as in lecture 1
 // sestoft@itu.dk * 2010-08-29
@@ -45,28 +47,31 @@ class Prim extends Expr {
     }
 
     public int eval(Map<String, Integer> env) {
-        if (oper.equals("+"))
+
+        if (oper.equals("+")) {
             return e1.eval(env) + e2.eval(env);
 
-        else if (oper.equals("*"))
+        } else if (oper.equals("*")) {
             return e1.eval(env) * e2.eval(env);
 
-        else if (oper.equals("-"))
+        } else if (oper.equals("-")) {
             return e1.eval(env) - e2.eval(env);
 
-        else
+        } else {
             throw new RuntimeException("unknown primitive");
+        }
     }
 }
 
 public class SimpleExpr {
 
     public static void main(String[] args) {
+
         Expr e1 = new CstI(17);
         Expr e2 = new Prim("+", new CstI(3), new Var("a"));
         Expr e3 = new Prim("+", new Prim("*", new Var("b"), new CstI(9)), new Var("a"));
 
-        Map<String, Integer> env0 = new HashMap<String, Integer>();
+        Map<String, Integer> env0 = new HashMap<>();
         env0.put("a", 3);
         env0.put("c", 78);
         env0.put("baf", 666);
