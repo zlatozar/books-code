@@ -92,9 +92,8 @@ module Intcomp1 =
             union (freevars erhs, minus (freevars ebody, [x]))
         | Prim(ope, e1, e2)   -> union (freevars e1, freevars e2)
 
-    (* Alternative definition of closed *)
-
-    let closed2 e = (freevars e = [])
+    // Alternative definition of closed
+    let closed2 e = List.isEmpty(freevars e)
 
     // _________________________________________________________________________
     //                   2.3.4 Substitution: Replacing Variables by Expressions
@@ -160,6 +159,12 @@ module Intcomp1 =
         | []    -> failwith "Variable not found"
         | y::yr -> if x=y then 0 else 1 + getindex yr x
 
+    // Compiling from Expr to Texpr. The compile-time environment cenv is a list of variable
+    // names; the position of a variable in the list indicates its binding depth and hence the
+    // position in the runtime environment. The integer giving the position is the same as a
+    // deBruijn index in the lambda calculus: the number of binders between this occurrence of a
+    // variable, and its binding.
+
     // Compiling from Expr to Texpr
     let rec tcomp (e: Expr) (cenv: string list) :Texpr =
         match e with
@@ -204,7 +209,7 @@ module Intcomp1 =
     // Match current instruction (<current instr>::<rest of instructions>) and the stack.
     // Needed parameters are i1 or i1, i2 so they are represented i2::i1::<rest of the stack>
 
-    // A simple stack machine for evaluation of variable-free expressions in postfix form.
+    // A simple stack machine for evaluation of variable-free expressions in postfix form
     let rec reval (inss: Rinstr list) (stack: int list) :int =
         match (inss, stack) with
         | ([], v :: _) -> v
@@ -243,7 +248,7 @@ module Intcomp1 =
 
     // A compile-time variable environment representing the *state* of the run-time stack
     type Stackvalue =
-        | Value             (* A computed value *)
+        | Value             (* A computed value used to calculate the offset *)
         | Bound of string   (* A bound variable *)
 
     // Compilation to a list of instructions for a unified-stack machine
@@ -253,9 +258,9 @@ module Intcomp1 =
         | CstI i -> [SCstI i]
         | Var x  -> [SVar (getindex cenv (Bound x))]  // new - map variable name to variable index at compile-time
         | Let(x, erhs, ebody) ->                      // new
-            scomp erhs cenv @ scomp ebody (Bound x :: cenv) @ [SSwap; SPop] // [SSwap; SPop] !!!
+            scomp erhs cenv @ scomp ebody (Bound x :: cenv) @ [SSwap; SPop] // [SSwap; SPop] to remove Let!!
         | Prim("+", e1, e2) ->
-            scomp e1 cenv @ scomp e2 (Value :: cenv) @ [SAdd]
+            scomp e1 cenv @ scomp e2 (Value :: cenv) @ [SAdd]  // adding Value on the second parameter we guarantee the correct offset
         | Prim("-", e1, e2) ->
             scomp e1 cenv @ scomp e2 (Value :: cenv) @ [SSub]
         | Prim("*", e1, e2) ->
@@ -271,10 +276,13 @@ module Intcomp1 =
         | (SAdd    :: insr, i2::i1::stkr) -> seval insr (i1+i2 :: stkr)
         | (SSub    :: insr, i2::i1::stkr) -> seval insr (i1-i2 :: stkr)
         | (SMul    :: insr, i2::i1::stkr) -> seval insr (i1*i2 :: stkr)
-        | (SPop    :: insr,    _ :: stkr) -> seval insr stkr
+        | (SPop    :: insr,    _ :: stkr) -> seval insr stkr                        // new
         | (SSwap   :: insr, i2::i1::stkr) -> seval insr (i1::i2::stkr)
         | (SSt     :: insr, stkr)         -> printf "S-> %A\n" stkr; seval insr stkr
         | _            -> failwith "seval: too few operands on stack"
+
+    // Correctness: eval e [] [] equals seval (scomp e []) [] for an expression with no free
+    // variables.
 
     // Output the integers in list 'inss' to the text file called 'fname'
     let intsToFile (inss: int list) (fname: string) =
