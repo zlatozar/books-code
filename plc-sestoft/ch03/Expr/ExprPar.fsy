@@ -14,6 +14,7 @@
 %token EOF
 
 /* Remove this two lines to see the shift errors */
+/* Tip: fsyacc -v --module ExprPar ExprPar.fsy   */
 
 %left MINUS PLUS /* lowest precedence */
 %left TIMES      /* highest precedence */
@@ -28,7 +29,7 @@ Main:
 ;
 
 Expr:
-    NAME                                { Var $1            }
+  | NAME                                { Var $1            }
   | CSTINT                              { CstI $1           }
   | MINUS CSTINT                        { CstI (- $2)       }
   | LPAR Expr RPAR                      { $2                }
