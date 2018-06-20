@@ -1,9 +1,9 @@
 %{
-  (* File Expr/ExprPar.fsy
-     Parser specification for the simple expression language.
-   *)
+
+  (* Parser specification for the simple expression language *)
 
   open Absyn
+
 %}
 
 %token <int> CSTINT
@@ -13,9 +13,13 @@
 %token LPAR RPAR
 %token EOF
 
+/* Remove this two lines to see the shift errors */
+
+%left MINUS PLUS /* lowest precedence */
+%left TIMES      /* highest precedence */
 
 %start Main
-%type <Absyn.expr> Main 
+%type <Absyn.Expr> Main
 
 %%
 
@@ -30,6 +34,6 @@ Expr:
   | LPAR Expr RPAR                      { $2                }
   | LET NAME EQ Expr IN Expr END        { Let($2, $4, $6)   }
   | Expr TIMES Expr                     { Prim("*", $1, $3) }
-  | Expr PLUS  Expr                     { Prim("+", $1, $3) }  
-  | Expr MINUS Expr                     { Prim("-", $1, $3) } 
+  | Expr PLUS  Expr                     { Prim("+", $1, $3) }
+  | Expr MINUS Expr                     { Prim("-", $1, $3) }
 ;

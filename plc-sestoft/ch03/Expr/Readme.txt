@@ -3,6 +3,9 @@ Compiling and loading the expression evaluator and parser (Expr/README.TXT)
 
 Archive expr.zip contains the files used below.
 
+mono ./packages/FsLexYacc/build/fsyacc.exe --module ExprPar ExprPar.fsy 
+mono ./packages/FsLexYacc/build/fslex.exe --unicode ExprLex.fsl
+
 A. Generating and compiling the lexer and parser for the expression
    language:
 

@@ -1,7 +1,6 @@
 {
-(* File Expr/Exprlex.fsl
-   Lexer specification for the simple expression language.
-*)
+
+(* Lexer specification for the simple expression language *)
 
 module ExprLex
 
