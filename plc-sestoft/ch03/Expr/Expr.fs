@@ -13,18 +13,17 @@ let e1 = Let("z", CstI 17, Prim("+", Var "z", Var "z"))
 let e2 = Let("z", CstI 17, Prim("+", Let("z", CstI 22, Prim("*", CstI 100, Var "z")), Var "z"))
 let e3 = Let("z", Prim("-", CstI 5, CstI 4), Prim("*", CstI 100, Var "z"))
 
-
-let e4 = Prim("-", Prim("-", Var "a", Var "b"), Var "c");
-let e5 = Prim("-", Var "a", Prim("-", Var "b", Var "c"));
-let e6 = Prim("*", Prim("-", Var "a", Var "b"), Var "c");
-let e7 = Prim("-", Prim("*", Var "a", Var "b"), Var "c");
-let e8 = Prim("*", Var "a", Prim("-", Var "b", Var "c"));
-let e9 = Prim("-", Var "a", Prim("*", Var "b", Var "c"));
+let e4 = Prim("-", Prim("-", Var "a", Var "b"), Var "c")
+let e5 = Prim("-", Var "a", Prim("-", Var "b", Var "c"))
+let e6 = Prim("*", Prim("-", Var "a", Var "b"), Var "c")
+let e7 = Prim("-", Prim("*", Var "a", Var "b"), Var "c")
+let e8 = Prim("*", Var "a", Prim("-", Var "b", Var "c"))
+let e9 = Prim("-", Var "a", Prim("*", Var "b", Var "c"))
 
 let es = [e1; e2; e3; e4; e5; e6; e7; e8; e9]
 
 //______________________________________________________________________________
-//                                                                          New
+//                                       From abstract syntax to concrete (New)
 
 // Formatting expressions as strings
 let rec private fmt1 (e: Expr) :string =
@@ -36,26 +35,28 @@ let rec private fmt1 (e: Expr) :string =
     | Prim(ope, e1, e2) ->
         String.concat "" ["("; fmt1 e1; ope; fmt1 e2; ")"]
 
+// Note: 'ctxpre' and 'pre'  represents priority
+
 // Format expressions as strings, avoiding excess parentheses
 let rec private fmt2 (ctxpre: int) (e: Expr) =
     match e with
       | CstI i -> i.ToString()
       | Var x  -> x
       | Let(x, erhs, ebody) ->
-            String.concat " " ["let"; x; "="; fmt2 -1 erhs; "in"; fmt2 -1 ebody; "end"]
+          String.concat " " ["let"; x; "="; fmt2 -1 erhs; "in"; fmt2 -1 ebody; "end"]
       | Prim(ope, e1, e2) ->
-            match ope with
-            | "+" -> wrappar ctxpre 6 [fmt2 5 e1; ope; fmt2 6 e2]
-            | "-" -> wrappar ctxpre 6 [fmt2 5 e1; ope; fmt2 6 e2]
-            | "*" -> wrappar ctxpre 7 [fmt2 6 e1; ope; fmt2 7 e2]
-            | _   -> raise (Failure "unknown primitive")
+          match ope with
+          | "+" -> wrappar ctxpre 6 [fmt2 5 e1; ope; fmt2 6 e2]
+          | "-" -> wrappar ctxpre 6 [fmt2 5 e1; ope; fmt2 6 e2]
+          | "*" -> wrappar ctxpre 7 [fmt2 6 e1; ope; fmt2 7 e2]
+          | _   -> raise (Failure "unknown primitive")
 
 and wrappar ctxpre pre ss =
     if pre <= ctxpre then String.concat "" ("(" :: ss @ [")"])
     else String.concat "" ss
 
 // Format expressions as strings
-let fmt e = fmt2 -1 e;
+let fmt e = fmt2 -1 e
 
 //______________________________________________________________________________
 //                                            Evaluation (same as in Chapter 2)
@@ -63,7 +64,7 @@ let fmt e = fmt2 -1 e;
 let rec lookup env x =
     match env with
       | []        -> failwith (x + " not found")
-      | (y, v)::r -> if x=y then v else lookup r x;;
+      | (y, v)::r -> if x=y then v else lookup r x
 
 let rec eval (e: Expr) (env: (string * int) list) :int =
     match e with
@@ -91,11 +92,11 @@ let rec closedin (e: Expr) (env: string list) :bool =
     | Let(x, erhs, ebody) ->
         let env1 = x :: env
         closedin erhs env && closedin ebody env1
-    | Prim(ope, e1, e2) -> closedin e1 env && closedin e2 env;
+    | Prim(ope, e1, e2) -> closedin e1 env && closedin e2 env
 
 (* An expression is closed if it is closed in the empty environment *)
 
-let closed1 e = closedin e [];
+let closed1 e = closedin e []
 
 //______________________________________________________________________________
 //                                                               Free variables
@@ -142,7 +143,7 @@ type Texpr =                            (* target expressions *)
 let rec getindex env x =
     match env with
     | [] -> raise (Failure "Variable not found")
-    | y::yr -> if x=y then 0 else 1 + getindex yr x;
+    | y::yr -> if x=y then 0 else 1 + getindex yr x
 
 // Compiling from Expr to Texpr. The compile-time environment cenv is a list of variable
 // names; the position of a variable in the list indicates its binding depth and hence the
@@ -291,4 +292,4 @@ let rec seval (inss: SInstr list) stack =
 // Output the integers in list inss to the text file called fname
 let intsToFile (inss : int list) (fname : string) =
     let text = String.concat " " (List.map string inss)
-    System.IO.File.WriteAllText(fname, text);;
+    System.IO.File.WriteAllText(fname, text)

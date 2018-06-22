@@ -6,6 +6,8 @@
 
 %}
 
+/* 1. Define terminals(tokens) */
+
 %token <int> CSTINT
 %token <string> NAME
 %token PLUS MINUS TIMES DIVIDE EQ
@@ -13,13 +15,18 @@
 %token LPAR RPAR
 %token EOF
 
+/* 2. Define operator associativity and precedence */
+
 /* Remove this two lines to see the shift errors */
 /* Tip: fsyacc -v --module ExprPar ExprPar.fsy   */
 
 %left MINUS PLUS /* lowest precedence */
 %left TIMES      /* highest precedence */
 
+/* 3. Define non terminals */
+
 %start Main
+
 %type <Absyn.Expr> Main
 
 %%

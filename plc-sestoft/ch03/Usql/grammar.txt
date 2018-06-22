@@ -1,67 +1,70 @@
 Grammar for micro-SQL, very simple SQL SELECT statements
 --------------------------------------------------------
-sestoft@itu.dk * 2001-02-22
 
 Grammar
 -------
 
-selstmt ::=                              program
-        select exprs1 from names1
+<const> ::=                                  constant literals
+         <CSTINT>                            integer literal
+         <CSTBOOL>                           boolean literal
+         <CSTSTRING>                         string literal
 
-expr ::=
-        *                                 star (all fields)
-        column                            a single column from a table
-        NAME ( exprs )                    function application
-        const                             constant literal
-        ( expr )                          parenthesized expression
-        not expr                          logical negation
-        expr op expr                      arithmetic, comparison
+<stmt> ::=                                   program
+        select <exprs_1> from <names_1>
 
-exprs ::= 
-                                          no expressions
-       exprs1                             at least one expression
+<expr> ::=
+        *                                   star (all fields)
+        <column>                            a single column from a table
+        NAME ( <exprs> )                    function application
+        <const>                             constant literal
+        ( <expr> )                          parenthesized expression
+        not <expr>                          logical negation
+        <expr> OP <expr>                    arithmetic, comparison
 
-exprs1 ::=                                comma-separated expression list
-        expr
-        expr ,  exprs1
+<column> ::=
+	  NAME                              column name
+	  NAME . NAME                       qualified name
 
-names1 ::=                                comma-separated name list
-        name
-        name ,  names1
+<exprs> ::=
+                                            no expressions
+          <exprs_1>                         at least one expression
 
+<exprs_1> ::=                               comma-separated expression list
+           <expr>
+           <expr> ,  <exprs_1>
 
-const ::=                                 constant literals
-        CSTINT                            integer literal
-        CSTBOOL                           boolean literal
-        CSTSTRING                         string literal
+<names_1> ::=                               comma-separated name list
+           NAME
+           NAME ,  names_1
 
+Examples:
+    SELECT name, zip FROM Person
+    SELECT COUNT(*) FROM Person
+    SELECT * FROM Person, Zip
+    SELECT Person.name, Zip.code FROM Person, Zip
 
 Lexical matters: tokens and comments
 ------------------------------------
 
-ID:         ['a'-'z''A'-'Z']['a'-'z''A'-'Z''0'-'9''_']*
+NAME:       ['a'-'z''A'-'Z']['a'-'z''A'-'Z''0'-'9''_']*
 
-            except for the keywords, which are:
-
-               and false from not or select true
+            Except for the keywords, which are:  and, false, from, not, or, select, true
 
             Keywords and identifiers may be written in lower case or
             upper case, but are converted to lower case.
 
-	    Also, in true SQL style, identifiers may be enclosed in
-	    double quotes:
+            Also, in true SQL style, identifiers may be enclosed in
+            double quotes:
 
-            '"'['a'-'z''A'-'Z''_']['a'-'z''A'-'Z''_''0'-'9'' ']*'"'
+            '"' ['a'-'z''A'-'Z''_']['a'-'z''A'-'Z''_''0'-'9'' ']* '"'
 
 CSTINT:     -?[0-9]+
 
 CSTBOOL:    false | true
 
-CSTSTRING:  'any characters and embedded quotes '' even'
-            
-OP:         + - * / % = <> < <= > >= 
+CSTSTRING:  ' any characters and embedded quotes '' even '
 
+OP:         + - * / % = <> < <= > >=
 
 Comments:
-
-        -- this comment extends to the end of line
+            -- this comment extends to the end of line

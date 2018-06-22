@@ -7,12 +7,9 @@
 
   <ItemGroup>
     <Compile Include="Absyn.fs" />
-    <Compile Include="ExprPar.fs" />
-    <Compile Include="ExprLex.fs" />
+    <Compile Include="UsqlPar.fs" />
+    <Compile Include="UsqlLex.fs" />
     <Compile Include="Parse.fs" />
-    <Compile Include="ParseTest.fs" />
-    <Compile Include="Expr.fs" />
-    <Compile Include="ExprTest.fs" />
     <Compile Include="Program.fs" />
     <None Include="Readme.txt" />
   </ItemGroup>

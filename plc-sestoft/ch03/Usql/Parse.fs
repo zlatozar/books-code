@@ -1,36 +1,42 @@
-(* Lexing and parsing of micro-SQL SELECT statements using fslex and fsyacc *)
+(* Lexing and parsing of micro-SQL SELECT statements using 'fslex' and 'fsyacc' *)
+
+module Parse
 
 open System
 open System.IO
 open Microsoft.FSharp.Text.Lexing
+
 open Absyn
 
 (* Plain parsing from a string, with poor error reporting *)
 
-let fromString (str : string) : stmt =
+let fromString (str: string) :Stmt =
     let lexbuf = LexBuffer<char>.FromString(str)
-    try 
+    try
       UsqlPar.Main UsqlLex.Token lexbuf
-    with 
-      | exn -> let pos = lexbuf.EndPos 
-               failwithf "%s near line %d, column %d\n" 
+
+    with
+      | exn -> let pos = lexbuf.EndPos
+               failwithf "%s near line %d, column %d\n"
                   (exn.Message) (pos.Line+1) pos.Column
 
 (* Parsing from a file *)
 
-let fromFile (filename : string) =
+let fromFile (filename: string) =
     use reader = new StreamReader(filename)
     let lexbuf = LexBuffer<char>.FromTextReader reader
-    try 
+    try
       UsqlPar.Main UsqlLex.Token lexbuf
-    with 
-      | exn -> let pos = lexbuf.EndPos 
-               failwithf "%s in file %s near line %d, column %d\n" 
+
+    with
+      | exn -> let pos = lexbuf.EndPos
+               failwithf "%s in file %s near line %d, column %d\n"
                   (exn.Message) filename (pos.Line+1) pos.Column
 
-(* Exercise it *)
+(* Examples *)
 
-let e1 = fromString "SELECT name, salary * (1 - taxrate) FROM Employee";;
+// fsharpi -r FsLexYacc.Runtime.dll Absyn.fs UsqlPar.fs UsqlLex.fs Parse.fs
 
-let e2 = fromString "SELECT department, AVG(salary * (1 - taxrate)) FROM Employee";;
-
+// open Parse;;
+// fromString "SELECT department, AVG(salary * (1 - taxrate)) FROM Employee";;
+// fromString "SELECT name, salary * (1 - taxrate) FROM Employee"

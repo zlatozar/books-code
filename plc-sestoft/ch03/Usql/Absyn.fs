@@ -1,24 +1,24 @@
-(* Abstract syntax for micro-SQL, very simple SQL SELECT statements 
-   sestoft@itu.dk 2009-09-03
- *)
+(* Abstract syntax for micro-SQL, very simple SQL SELECT statements *)
 
 module Absyn
 
-type constant =
+// Use grammar.txt for reference
+
+type Constant =
   | CstI of int                         (* Integer constant               *)
   | CstB of bool                        (* Boolean constant               *)
   | CstS of string                      (* String constant                *)
 
-type stmt =
-  | Select of expr list                 (* fields are expressions         *)
+type Stmt =
+  | Select of Expr list                 (* fields are expressions         *)
             * string list               (* FROM ...                       *)
 
-and column =
+and Columns =
   | Column of string                    (* A column name: c               *)
   | TableColumn of string * string      (* A qualified column: t.c        *)
 
-and expr = 
+and Expr =
   | Star
-  | Cst of constant                     (* Constant                       *)
-  | ColumnExpr of column                (* Column                         *)
-  | Prim of string * expr list          (* Built-in function              *)
+  | Cst of Constant                     (* Constant                       *)
+  | ColumnExpr of Columns               (* Columns                        *)
+  | Prim of string * Expr list          (* Built-in function              *)

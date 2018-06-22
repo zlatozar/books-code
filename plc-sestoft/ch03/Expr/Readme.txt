@@ -3,8 +3,8 @@ Compiling and loading the expression evaluator and parser (Expr/README.TXT)
 
 Archive expr.zip contains the files used below.
 
-mono ./packages/FsLexYacc/build/fsyacc.exe --module ExprPar ExprPar.fsy 
 mono ./packages/FsLexYacc/build/fslex.exe --unicode ExprLex.fsl
+mono ./packages/FsLexYacc/build/fsyacc.exe --module ExprPar ExprPar.fsy
 
 A. Generating and compiling the lexer and parser for the expression
    language:
@@ -14,7 +14,7 @@ A. Generating and compiling the lexer and parser for the expression
    fsharpi -r FsLexYacc.Runtime.dll Absyn.fs ExprPar.fs ExprLex.fs Parse.fs
 
    open Parse;;
-   fromString "2 + 3 * 4";;     
+   fromString "2 + 3 * 4";;
 
    #q;;
 

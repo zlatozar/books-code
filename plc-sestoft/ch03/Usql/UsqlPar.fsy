@@ -1,10 +1,12 @@
 %{
-  (* Usql/UsqlPar.fsy
-     Parser specification for micro-SQL
-     sestoft@itu.dk 2009-09-03 *)
+
+  (* Parser specification for micro-SQL *)
 
   open Absyn;
+
 %}
+
+/* Define terminals */
 
 %token <int> CSTINT
 %token <string> CSTSTRING NAME
@@ -12,55 +14,60 @@
 
 %token AND FROM NOT OR SELECT WHERE
 %token PLUS MINUS TIMES DIV MOD
-%token EQ NE GT LT GE LE 
+%token EQ NE GT LT GE LE
 %token LPAR RPAR COMMA DOT
 %token EOF
 
 %left OR		/* lowest precedence */
 %left AND
-%left EQ NE 
-%nonassoc GT LT GE LE
+%left EQ NE
+%left GT LT GE LE
 %left PLUS MINUS
-%left TIMES DIV MOD 
+%left TIMES DIV MOD
 %nonassoc NOT
 %nonassoc DOT           /* highest precedence  */
 
+/* Define non terminals */
+
 %start Main
-%type <Absyn.stmt> Main
-%type <Absyn.stmt> Stmt
-%type <Absyn.column> Column
-%type <Absyn.expr> Expr
-%type <Absyn.expr list> Exprs Exprs1
-%type <Absyn.constant> Const
+
+%type <Absyn.Stmt> Main
+%type <Absyn.Stmt> Stmt
+%type <Absyn.Columns> Column
+%type <Absyn.Expr> Expr
+%type <Absyn.Expr list> Exprs Exprs1
+%type <Absyn.Constant> Const
 %type <string list> Names1
 
 %%
+
+/* Begin parsing */
 
 Main:
     Stmt EOF				{ $1 }
 ;
 
 Stmt:
-    SELECT Exprs1 FROM Names1          { Select($2, $4) }
+    SELECT Exprs1 FROM Names1           { Select($2, $4) }
 ;
 
-Names1: 
-    NAME                                { [$1]     }
+Names1:
+  | NAME                                { [$1]     }
   | NAME COMMA Names1                   { $1 :: $3 }
 ;
 
-Column: 
-    NAME				{ Column $1           }
+Column:
+  | NAME				{ Column $1           }
   | NAME DOT NAME			{ TableColumn($1, $3) }
 ;
 
 Expr:
-    TIMES				{ Star                 }
-  | Column				{ ColumnExpr $1        } 
+  | TIMES				{ Star                 }
+  | Column				{ ColumnExpr $1        }
   | NAME LPAR Exprs RPAR		{ Prim($1, $3)         }
   | Const                               { Cst($1)              }
   | LPAR Expr RPAR                      { $2                   }
-  | NOT Expr                            { Prim("!", [$2])      }
+  | NOT Expr                            { Prim("!",  [$2])     }
   | Expr PLUS  Expr                     { Prim("+",  [$1; $3]) }
   | Expr MINUS Expr                     { Prim("-",  [$1; $3]) }
   | Expr TIMES Expr                     { Prim("*",  [$1; $3]) }
@@ -77,18 +84,18 @@ Expr:
 ;
 
 Exprs:
-    /* empty */                         { [] }
+  | /* empty */                         { [] }
   | Exprs1                              { $1 }
 ;
 
 Exprs1:
-    Expr                                { [$1]     }
+  | Expr                                { [$1]     }
   | Expr COMMA Exprs1                   { $1 :: $3 }
 ;
 
 Const:
-    CSTINT                              { CstI($1)   }
-  | MINUS CSTINT                        { CstI(-$2) }
+  | CSTINT                              { CstI($1)   }
+  | MINUS CSTINT                        { CstI(-$2)  }
   | CSTBOOL                             { CstB($1)   }
   | CSTSTRING                           { CstS($1)   }
 ;
