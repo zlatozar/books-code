@@ -1,5 +1,24 @@
-Grammar for a functional language * sestoft@itu.dk * 2009-09-14
--------------------------------000-----------------------------
+Grammar for a functional language
+---------------------------------
+
+Lexical matters: tokens and comments
+------------------------------------
+
+NAME:       [`a`-`z``A`-`Z`][`a`-`z``A`-`Z``0`-`9`]*
+
+            Except for the keywords, which are: else end false if in let not then true
+
+CSTINT:     -?[0-9]+
+
+CSTBOOL:    false | true
+
+OP:         + - * / % = <> < <= > >=
+
+
+Comments (possibly nested):
+
+           (* ... *) delimited comment
+
 
 First attempt at a grammar
 --------------------------
@@ -11,87 +30,78 @@ and the interpreter in Fun.fs, allow functions to take only one
 argument, for simplicity.
 
 
-program ::=                              program
-        expr
-        
-expr ::=
-        const                             constant literal
-        NAME                              local variable or parameter
-        let NAME = expr in expr end       local binding
-        let NAME ids1 = expr in expr end  function binding
-        ( expr )                          parenthesized expression
-        if expr then expr else expr       conditional expressions
-        not expr                          logical negation
-        expr op expr                      arithmetic, comparison
-        ID exprs1                         function call 
+<program> ::=                                   program
+            <expr>
 
-ids1 ::= 
+<expr> ::=
+        <const>                                 constant literal
+        NAME                                    local variable or parameter
+        let NAME = <expr> in <expr> end         local binding
+        let NAME <ids1> = <expr> in <expr> end  function binding
+        ( <expr> )                              parenthesized expression
+        if <expr> then <expr> else <expr>       conditional expressions
+        not <expr>                              logical negation
+        <expr> <op> <expr>                      arithmetic, comparison
+        <NAME> <exprs1>                         function call
+
+<ids1> ::=
         NAME                              one parameter
-        NAME ids1                         more than one parameter
+        NAME <ids1>                       more than one parameter
 
-exprs1 ::=                                non-empty expression list
-        expr
-        expr exprs1
+<exprs1> ::=                              non-empty expression list
+          <expr>
+          <expr> <exprs1>
 
 const ::=                                 constant literals
         CSTINT                            integer literal
         CSTBOOL                           boolean literal
 
+ATTENTION:
 This grammar is highly ambiguous because of the function application
-syntax without parentheses.  
+syntax without parentheses.
 
 
-Second attempt at a grammar 
+Second attempt at a grammar
 ---------------------------
 
 We therefore rewrite the grammar to distinguish between atomic
-expressions and other expressions.  An atomic expression is a
-constant, or a variable, or a let-in-end expression, or a
+expressions and other expressions. An atomic expression is a
+constant, or a variable, or a 'let-in-end' expression, or a
 parenthesized expression (so it is easy to see where an atomic
 expression begins and ends):
 
-atexpr ::=
-        const                             constant literal
-        NAME                              local variable or parameter
-        let NAME = expr in expr end       local binding
-        let NAME ids1 = expr in expr end  function binding
-        ( expr )                          parenthesized expression
+<atomexpr> ::=
+             <const>                                 constant literal
+             NAME                                    local variable or parameter
+             let NAME = <expr> in <expr> end         local binding
+             let NAME <ids1> = <expr> in <expr> end  function binding
+             ( <expr> )                              parenthesized expression
 
 and then we require the arguments of a function application to be
 atomic expressions:
 
-appexpr ::= 
-        atexpr atexpr                     one-argument function call
-        appexpr atexpr                    multi-argument function call
+<funcappexpr> ::=
+        <atomexpr>                              one-argument function call
+        <funcappexpr> <atomexpr>                multi-argument function call
 
-so that the final syntax for expressions is
+Examples:
 
-expr ::=
-        atexpr                            atomic expression
-        appexpr                           function call
-        if expr then expr else expr       conditional expressions
-        not expr                          logical negation
-        expr op expr                      arithmetic, comparison
+(* Delcare a function and call it *)
+let f x = x + 7 in f 2 end
 
-and the nonterminal exprs1 is not needed any longer.
+(* A function f that declares function g *)
+let f x =
+    let g y =
+    	x + y in g (2 * x) end
+in f 7 end
 
+so that the final syntax for expressions is:
 
-Lexical matters: tokens and comments
-------------------------------------
+<expr> ::=
+        <atomexpr>                          atomic expression
+        <funcappexpr>                       function call
+        if <expr> then <expr> else <expr>   conditional expressions
+        not <expr>                          logical negation
+        <expr> <op> <expr>                  arithmetic, comparison
 
-NAME:       [`a`-`z``A`-`Z`][`a`-`z``A`-`Z``0`-`9`]*
-
-            except for the keywords, which are:
-
-            else end false if in let not then true
-
-CSTINT:     -?[0-9]+
-
-CSTBOOL:    false | true
-
-OP:         + - * / % = <> < <= > >= 
-
-
-Comments (possibly nested):
-
-        (* ... *) delimited comment
+and the nonterminal <exprs1> is not needed any longer.

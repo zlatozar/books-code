@@ -18,7 +18,7 @@ let fromString (str: string) :Stmt =
     with
       | exn -> let pos = lexbuf.EndPos
                failwithf "%s near line %d, column %d\n"
-                  (exn.Message) (pos.Line+1) pos.Column
+                  (exn.Message) (pos.Line + 1) pos.Column
 
 (* Parsing from a file *)
 
@@ -31,7 +31,7 @@ let fromFile (filename: string) =
     with
       | exn -> let pos = lexbuf.EndPos
                failwithf "%s in file %s near line %d, column %d\n"
-                  (exn.Message) filename (pos.Line+1) pos.Column
+                  (exn.Message) filename (pos.Line + 1) pos.Column
 
 (* Examples *)
 
@@ -39,4 +39,4 @@ let fromFile (filename: string) =
 
 // open Parse;;
 // fromString "SELECT department, AVG(salary * (1 - taxrate)) FROM Employee";;
-// fromString "SELECT name, salary * (1 - taxrate) FROM Employee"
+// fromString "SELECT name, salary * (1 - taxrate) FROM Employee";;

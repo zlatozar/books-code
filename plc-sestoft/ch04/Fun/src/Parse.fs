@@ -1,4 +1,4 @@
-(* Lexing and parsing of micro-ML programs using fslex and fsyacc *)
+(* Lexing and parsing of micro-ML programs using 'fslex' and 'fsyacc' *)
 
 module Parse
 
@@ -10,55 +10,57 @@ open Absyn
 
 (* Plain parsing from a string, with poor error reporting *)
 
-let fromString (str : string) : expr =
+let fromString (str : string) : Expr =
     let lexbuf = LexBuffer<char>.FromString(str)
-    try 
+    try
       FunPar.Main FunLex.Token lexbuf
-    with 
-      | exn -> let pos = lexbuf.EndPos 
-               failwithf "%s near line %d, column %d\n" 
+
+    with
+      | exn -> let pos = lexbuf.EndPos
+               failwithf "%s near line %d, column %d\n"
                   (exn.Message) (pos.Line+1) pos.Column
-             
+
 (* Parsing from a file *)
 
 let fromFile (filename : string) =
     use reader = new StreamReader(filename)
     let lexbuf = LexBuffer<char>.FromTextReader reader
-    try 
+    try
       FunPar.Main FunLex.Token lexbuf
-    with 
-      | exn -> let pos = lexbuf.EndPos 
-               failwithf "%s in file %s near line %d, column %d\n" 
+
+    with
+      | exn -> let pos = lexbuf.EndPos
+               failwithf "%s in file %s near line %d, column %d\n"
                   (exn.Message) filename (pos.Line+1) pos.Column
 
 (* Exercise it *)
 
-let e1 = fromString "5+7";;
-let e2 = fromString "let f x = x + 7 in f 2 end";;
+let e1 = fromString "5+7"
+let e2 = fromString "let f x = x + 7 in f 2 end"
 
-(* Examples in concrete syntax *)
+(* Examples in concrete syntax. Note F# raw strings *)
 
-let ex1 = fromString 
-            @"let f1 x = x + 1 in f1 12 end";;
+let ex1 = fromString
+            @"let f1 x = x + 1 in f1 12 end"
 
 (* Example: factorial *)
 
-let ex2 = fromString 
+let ex2 = fromString
             @"let fac x = if x=0 then 1 else x * fac(x - 1)
               in fac n end";;
 
 (* Example: deep recursion to check for constant-space tail recursion *)
 
-let ex3 = fromString 
-            @"let deep x = if x=0 then 1 else deep(x-1) 
+let ex3 = fromString
+            @"let deep x = if x=0 then 1 else deep(x-1)
               in deep count end";;
-    
+
 (* Example: static scope (result 14) or dynamic scope (result 25) *)
 
-let ex4 = fromString 
+let ex4 = fromString
             @"let y = 11
               in let f x = x + y
-                 in let y = 22 in f 3 end 
+                 in let y = 22 in f 3 end
                  end
               end";;
 
@@ -67,6 +69,6 @@ let ex4 = fromString
 let ex5 = fromString
             @"let ge2 x = 1 < x
               in let fib n = if ge2(n) then fib(n-1) + fib(n-2) else 1
-                 in fib 25 
+                 in fib 25
                  end
               end";;

@@ -80,10 +80,11 @@ and SkipToEndLine = parse
   | eof             { () }
   | _               { SkipToEndLine lexbuf }
 
+// Tip: could be reused in feature projects
 and String chars = parse
   | '''
       { Microsoft.FSharp.Core.String.concat "" (List.map string (List.rev chars)) }
-  | '\\' ['\\' '"' 'a' 'b' 't' 'n' 'v' 'f' 'r']
+  | '\\' ['\\' '"' 'a' 'b' 't' 'n' 'v' 'f' 'r']   // e.g. \a \n \t...
       { String (cEscape (lexemeAsString lexbuf) :: chars) lexbuf }
   | "''"
       { String ('\'' :: chars) lexbuf }

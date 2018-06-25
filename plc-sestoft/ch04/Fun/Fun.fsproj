@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="src/Absyn.fs" />
+    <Compile Include="src/FunPar.fs" />
+    <Compile Include="src/FunLex.fs" />
+    <Compile Include="src/Parse.fs" />
+    <Compile Include="src/Fun.fs" />
+    <Compile Include="src/TypedFun.fs" /> 
+    <Compile Include="src/Program.fs" />
+    <None Include="Readme.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FsLexYacc" Version="7.0.6" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <PackageReference Include="FsUnit.xUnit" Version="3.1.0" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+  </ItemGroup>
+
+</Project>
