@@ -11,22 +11,21 @@ module Fun
 
 open Absyn
 
-(* Environment operations *)
+(* Environment contains runtime values *)
 
 type 'v Env = (string * 'v) list
+
+// A *runtime value* is an integer or a function closure
+type Value =
+  | Int of int
+  | Closure of string * string * Expr * Value Env  // (f, x, fBody, fDeclEnv) closure abstract syntax
 
 let rec lookup env x =
     match env with
     | []        -> failwith (x + " not found")
     | (y, v)::r -> if x=y then v else lookup r x
 
-(* A runtime value is an integer or a function closure *)
-
-type Value =
-  | Int of int
-  | Closure of string * string * Expr * Value Env       // (f, x, fBody, fDeclEnv)
-
-// see "structural operational semantics" p. 64
+// See "structural operational semantics" p. 64 to understand the algorithm
 let rec eval (e: Expr) (env: Value Env) :int =
     match e with
     | CstI i -> i
@@ -35,6 +34,7 @@ let rec eval (e: Expr) (env: Value Env) :int =
         match lookup env x with
         | Int i -> i
         | _     -> failwith "eval Var"
+
     | Prim(ope, e1, e2) ->
         let i1 = eval e1 env
         let i2 = eval e2 env
@@ -45,16 +45,20 @@ let rec eval (e: Expr) (env: Value Env) :int =
         | "=" -> if i1 = i2 then 1 else 0
         | "<" -> if i1 < i2 then 1 else 0
         | _   -> failwith ("unknown primitive " + ope)
+
     | Let(x, eRhs, letBody) ->
         let xVal = Int(eval eRhs env)
-        let bodyEnv = (x, xVal) :: env
+        let bodyEnv = (x, xVal) :: env  // extend the env. with result of the RHS
         eval letBody bodyEnv
+
     | If(e1, e2, e3) ->
         let b = eval e1 env
         if b<>0 then eval e2 env else eval e3 env
+
     | Letfun(f, x, fBody, letBody) ->
-        let bodyEnv = (f, Closure(f, x, fBody, env)) :: env
+        let bodyEnv = (f, Closure(f, x, fBody, env)) :: env  // extend env. with a Closure
         eval letBody bodyEnv
+
     | Call(Var f, eArg) ->
         let fClosure = lookup env f
         match fClosure with
@@ -63,6 +67,7 @@ let rec eval (e: Expr) (env: Value Env) :int =
             let fBodyEnv = (x, xVal) :: (f, fClosure) :: fDeclEnv
             eval fBody fBodyEnv
         | _ -> failwith "eval Call: not a function"
+
     | Call _ -> failwith "eval Call: not first-order function"
 
 (* Evaluate in empty environment: program must have no free variables: *)
