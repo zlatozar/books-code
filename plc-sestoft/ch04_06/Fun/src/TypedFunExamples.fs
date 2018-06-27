@@ -1,4 +1,4 @@
-module ParseAndType
+module TypedFunExamples
 
 open Parse
 open TypeInference
@@ -34,20 +34,20 @@ let tex5 =
 let tex6 =
     inferType(fromString
                @"let id x = x
-                 in let i1 = id
-                 in let i2 = id
-                 in let k x = let k2 y = x in k2 end
-                 in (k 2) (i1 false) = (k 4) (i1 i2) end end end end ")
+                   in let i1 = id
+                     in let i2 = id
+                       in let k x = let k2 y = x in k2 end
+                 in (k 2) (i1 false) = (k 4) (i1 i2) end end end end")
 
 // A large type
 let tex7 =
     inferType(fromString
                @"let pair x = let p1 y = let p2 p = p x y in p2 end in p1 end
-                 in let id x = x
-                 in let p1 = pair id id
-                 in let p2 = pair p1 p1
-                 in let p3 = pair p2 p2
-                 in let p4 = pair p3 p3
+                   in let id x = x
+                     in let p1 = pair id id
+                       in let p2 = pair p1 p1
+                         in let p3 = pair p2 p2
+                           in let p4 = pair p3 p3
                  in p4 end end end end end end")
 
 (*

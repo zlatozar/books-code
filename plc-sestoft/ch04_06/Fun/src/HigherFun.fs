@@ -53,24 +53,23 @@ let rec eval (e: Expr) (env: Value Env) :Value =
             let fBodyEnv = (x, xVal) :: (f, fClosure) :: fDeclEnv in eval fBody fBodyEnv
         | _ -> failwith "eval Call: not a function"
 
-(* Evaluate in empty environment: program must have no free variables: *)
-
+// Evaluate in empty environment: program must have no free variables
 let run e = eval e []
 
-(* Examples in abstract syntax *)
+// _____________________________________________________________________________
+//                                                  Examples in abstract syntax
 
 let ex1 = Letfun("f1", "x", Prim("+", Var "x", CstI 1),
-                 Call(Var "f1", CstI 12));
+                 Call(Var "f1", CstI 12))
 
-(* Factorial *)
-
+// Factorial
 let ex2 = Letfun("fac", "x",
                  If(Prim("=", Var "x", CstI 0),
                     CstI 1,
                     Prim("*", Var "x",
                               Call(Var "fac",
                                    Prim("-", Var "x", CstI 1)))),
-                 Call(Var "fac", Var "n"));
+                 Call(Var "fac", Var "n"))
 
 (* let fac10 = eval ex2 [("n", Int 10)] *)
 

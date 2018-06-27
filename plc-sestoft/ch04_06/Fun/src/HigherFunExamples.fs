@@ -1,28 +1,26 @@
-(* File Fun/ParseAndRunHigher.fs *)
+module HigherFunExamples
 
-module ParseAndRunHigher
-
-open HigherFun
 open Parse
 
-(* Examples of higher-order programs, in concrete syntax *)
+// _____________________________________________________________________________
+//                        Examples of higher-order programs, in concrete syntax
 
 let ex5 =
-    Parse.fromString
+    fromString
      @"let tw g = let app x = g (g x) in app end
        in let mul3 x = 3 * x
        in let quad = tw mul3
        in quad 7 end end end"
 
 let ex6 =
-    Parse.fromString
+    fromString
      @"let tw g = let app x = g (g x) in app end
        in let mul3 x = 3 * x
        in let quad = tw mul3
        in quad end end end"
 
 let ex7 =
-    Parse.fromString
+    fromString
      @"let rep n =
            let rep1 g =
                let rep2 x = if n=0 then x else rep (n-1) g (g x)
@@ -34,7 +32,7 @@ let ex7 =
        in quad 7 end end end end"
 
 let ex8 =
-    Parse.fromString
+    fromString
      @"let rep n =
            let rep1 g =
                let rep2 x = if n=0 then x else rep (n-1) g (g x)
@@ -45,7 +43,7 @@ let ex8 =
        in twototen 7 end end end"
 
 let ex9 =
-    Parse.fromString
+    fromString
      @"let rep n =
            let rep1 g =
                let rep2 x = if n=0 then x else rep (n-1) g (g x)
