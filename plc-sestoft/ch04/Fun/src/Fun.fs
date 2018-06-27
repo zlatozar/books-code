@@ -16,6 +16,7 @@ open Absyn
 type 'v Env = (string * 'v) list
 
 // A *runtime value* is an integer or a function closure
+// fDeclEnv contains bindings of function's free variables
 type Value =
   | Int of int
   | Closure of string * string * Expr * Value Env  // (f, x, fBody, fDeclEnv) closure abstract syntax

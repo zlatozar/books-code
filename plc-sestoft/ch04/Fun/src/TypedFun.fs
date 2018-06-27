@@ -7,12 +7,11 @@ type 'v Env = (string * 'v) list
 (* A type is int, bool or function *)
 
 type Type =
-  | TypeInt                                (* int                          *)
-  | TypeBool                                (* bool                         *)
+  | TypeInt                                 (* int                          *)
+  | TypeBool                                (* boolean                      *)
   | TypeFunc of Type * Type                 (* (argument type, result type) *)
 
-(* New abstract syntax with explicit types. Some kind of meta-language. *)
-
+// New abstract syntax with explicit types. Some kind of meta-language
 type TypeExpr =
   | CstI of int
   | CstB of bool
@@ -24,8 +23,7 @@ type TypeExpr =
           // (f,       x,       xType, fBody,    rType,  letBody)
   | Call of TypeExpr * TypeExpr
 
-(* A runtime value is an integer or a function closure *)
-
+// A runtime value is an integer or a function closure
 type RValue =
   | Int of int
   | Closure of string * string * TypeExpr * RValue Env      // (f, x, fBody, fDeclEnv)
@@ -79,8 +77,7 @@ let rec eval (e: TypeExpr) (env: RValue Env) :int =
 
     | Call _ -> failwith "illegal function in Call"
 
-(* Type checking for the first-order functional language: *)
-
+// Type checking for the first-order functional language
 let rec typeInf (e: TypeExpr) (env: Type Env) :Type =
     match e with
     | CstI i -> TypeInt
@@ -131,15 +128,16 @@ let rec typeInf (e: TypeExpr) (env: Type Env) :Type =
 
     | Call(_, eArg) -> failwith "Call: illegal function in call"
 
+
 let typeCheck e = typeInf e []
 
-(* Examples of successful type checking *)
+// _____________________________________________________________________________
+//                                         Examples of successful type checking
 
 let ex1 = Letfun("f1", "x", TypeInt, Prim("+", Var "x", CstI 1), TypeInt,
                  Call(Var "f1", CstI 12))
 
-(* Factorial *)
-
+// Factorial
 let ex2 = Letfun("fac", "x", TypeInt,
                  If(Prim("=", Var "x", CstI 0),
                     CstI 1,
@@ -162,9 +160,11 @@ let ex5 = If(Prim("=", CstI 11, CstI 12), CstI 111, CstI 666)
 let ex6 = Letfun("inf", "x", TypeInt, Call(Var "inf", Var "x"), TypeInt,
                  Call(Var "inf", CstI 0))
 
+// Do type checking to all
 let types = List.map typeCheck [ex1; ex2; ex3; ex4; ex5; ex6]
 
-(* Examples of type errors; should throw exception when run: *)
+// _____________________________________________________________________________
+//                     Examples of type errors; should throw exception when run
 
 let exErr1 = Let("b", Prim("=", CstI 1, CstI 2),
                  If(Var "b", Var "b", CstI 6))

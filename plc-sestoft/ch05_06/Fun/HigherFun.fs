@@ -1,4 +1,4 @@
-(* A functional language with integers and higher-order functions 
+(* A functional language with integers and higher-order functions
    sestoft@itu.dk 2009-09-11
 
    The language is higher-order because the value of an expression may
@@ -21,13 +21,13 @@ open Absyn
 type 'v env = (string * 'v) list
 
 let rec lookup env x =
-    match env with 
+    match env with
     | []        -> failwith (x + " not found")
     | (y, v)::r -> if x=y then v else lookup r x;;
 
 (* A runtime value is an integer or a function closure *)
 
-type value = 
+type value =
   | Int of int
   | Closure of string * string * expr * value env       (* (f, x, fBody, fDeclEnv) *)
 
@@ -36,7 +36,7 @@ let rec eval (e : expr) (env : value env) : value =
     | CstI i -> Int i
     | CstB b -> Int (if b then 1 else 0)
     | Var x  -> lookup env x
-    | Prim(ope, e1, e2) -> 
+    | Prim(ope, e1, e2) ->
       let v1 = eval e1 env
       let v2 = eval e2 env
       match (ope, v1, v2) with
@@ -46,19 +46,19 @@ let rec eval (e : expr) (env : value env) : value =
       | ("=", Int i1, Int i2) -> Int (if i1 = i2 then 1 else 0)
       | ("<", Int i1, Int i2) -> Int (if i1 < i2 then 1 else 0)
       |  _ -> failwith "unknown primitive or wrong type"
-    | Let(x, eRhs, letBody) -> 
+    | Let(x, eRhs, letBody) ->
       let xVal = eval eRhs env
-      let letEnv = (x, xVal) :: env 
+      let letEnv = (x, xVal) :: env
       eval letBody letEnv
-    | If(e1, e2, e3) -> 
+    | If(e1, e2, e3) ->
       match eval e1 env with
       | Int 0 -> eval e3 env
       | Int _ -> eval e2 env
       | _     -> failwith "eval If"
-    | Letfun(f, x, fBody, letBody) -> 
+    | Letfun(f, x, fBody, letBody) ->
       let bodyEnv = (f, Closure(f, x, fBody, env)) :: env
       eval letBody bodyEnv
-    | Call(eFun, eArg) -> 
+    | Call(eFun, eArg) ->                  // new version
       let fClosure = eval eFun env
       match fClosure with
       | Closure (f, x, fBody, fDeclEnv) ->
@@ -73,31 +73,31 @@ let run e = eval e [];;
 
 (* Examples in abstract syntax *)
 
-let ex1 = Letfun("f1", "x", Prim("+", Var "x", CstI 1), 
+let ex1 = Letfun("f1", "x", Prim("+", Var "x", CstI 1),
                  Call(Var "f1", CstI 12));
 
 (* Factorial *)
 
-let ex2 = Letfun("fac", "x", 
+let ex2 = Letfun("fac", "x",
                  If(Prim("=", Var "x", CstI 0),
                     CstI 1,
-                    Prim("*", Var "x", 
-                              Call(Var "fac", 
+                    Prim("*", Var "x",
+                              Call(Var "fac",
                                    Prim("-", Var "x", CstI 1)))),
                  Call(Var "fac", Var "n"));
 
 (* let fac10 = eval ex2 [("n", Int 10)];; *)
 
-let ex3 = 
-    Letfun("tw", "g", 
-           Letfun("app", "x", Call(Var "g", Call(Var "g", Var "x")), 
+let ex3 =
+    Letfun("tw", "g",
+           Letfun("app", "x", Call(Var "g", Call(Var "g", Var "x")),
                   Var "app"),
-           Letfun("mul3", "y", Prim("*", CstI 3, Var "y"), 
+           Letfun("mul3", "y", Prim("*", CstI 3, Var "y"),
                   Call(Call(Var "tw", Var "mul3"), CstI 11)));;
 
-let ex4 = 
+let ex4 =
     Letfun("tw", "g",
-           Letfun("app", "x", Call(Var "g", Call(Var "g", Var "x")), 
+           Letfun("app", "x", Call(Var "g", Call(Var "g", Var "x")),
                   Var "app"),
-           Letfun("mul3", "y", Prim("*", CstI 3, Var "y"), 
+           Letfun("mul3", "y", Prim("*", CstI 3, Var "y"),
                   Call(Var "tw", Var "mul3")));;
