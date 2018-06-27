@@ -16,26 +16,25 @@ let rec lookup env x =
     | []        -> failwith (x + " not found")
     | (y, v)::r -> if x=y then v else lookup r x;;
 
-(* Operations on sets of type variables, represented as lists.
-   Inefficient but simple.  Basically compares type variables
-   on their string names.  Correct so long as all type variable names
-   are distinct. *)
+(*
+   Operations on sets of type variables, represented as lists.  Inefficient but simple.
+   Basically compares type variables on their string names.  Correct so long as all type
+   variable names are distinct.
+*)
 
 let rec mem x vs =
     match vs with
     | []      -> false
     | v :: vr -> x=v || mem x vr;;
 
-(* union(xs, ys) is the set of all elements in xs or ys, without duplicates *)
-
+// union(xs, ys) is the set of all elements in xs or ys, without duplicates
 let rec union (xs, ys) =
     match xs with
     | []    -> ys
     | x::xr -> if mem x ys then union(xr, ys)
                else x :: union(xr, ys);;
 
-(* unique xs  is the set of members of xs, without duplicates *)
-
+// unique xs  is the set of members of xs, without duplicates
 let rec unique xs =
     match xs with
     | []    -> []
@@ -71,20 +70,21 @@ let setTvLevel tyvar newLevel =
     let (kind, lvl) = !tyvar
     tyvar := (kind, newLevel)
 
-(* Normalize a type; make type variable point directly to the
-   associated type (if any).  This is the `find' operation, with path
-   compression, in the union-find algorithm. *)
+(*
+   Normalize a type; make type variable point directly to the associated type (if any).
+   This is the `find' operation, with path compression, in the union-find algorithm.
+*)
 
 let rec normType t0 =
     match t0 with
     | TypV tyvar ->
-      match !tyvar with
-      | (LinkTo t1, _) -> let t2 = normType t1
-                          setTvKind tyvar (LinkTo t2); t2
-      | _ -> t0
+        match !tyvar with
+        | (LinkTo t1, _) -> let t2 = normType t1
+                            setTvKind tyvar (LinkTo t2); t2
+        | _ -> t0
     |  _ -> t0;
 
-let rec freeTypeVars t : typevar list =
+let rec freeTypeVars t :typevar list =
     match normType t with
     | TypI        -> []
     | TypB        -> []
@@ -100,10 +100,11 @@ let pruneLevel maxLevel tvs =
         setTvLevel tyvar (min level maxLevel)
     List.iter reducelevel tvs
 
-(* Make type variable tyvar equal to type t (by making tyvar link to t),
-   but first check that tyvar does not occur in t, and reduce the level
-   of all type variables in t to that of tyvar.  This is the `union'
-   operation in the union-find algorithm.  *)
+(*
+   Make type variable 'tyvar' equal to type t (by making tyvar link to t), but first check
+   that tyvar does not occur in t, and reduce the level of all type variables in t to that
+   of tyvar.  This is the `union' operation in the union-find algorithm.
+*)
 
 let rec linkVarToType tyvar t =
     let (_, level) = !tyvar
@@ -112,14 +113,14 @@ let rec linkVarToType tyvar t =
     pruneLevel level fvs;
     setTvKind tyvar (LinkTo t)
 
-let rec typeToString t : string =
+let rec typeToString t :string =
     match t with
     | TypI         -> "int"
     | TypB         -> "bool"
     | TypV _       -> failwith "typeToString impossible"
     | TypF(t1, t2) -> "function"
 
-//  Unify two types, equating type variables with types as necessary
+// Unify two types, equating type variables with types as necessary
 let rec unify t1 t2 :unit =
     let t1' = normType t1
     let t2' = normType t2
@@ -149,12 +150,14 @@ let newTypeVar level :typevar =
     let rec mkname i res =
             if i < 26 then char(97 + i) :: res
             else mkname (i/26 - 1) (char(97 + i%26) :: res)
-    let intToName i = new System.String(Array.ofList('\'' :: mkname i []))
+    let intToName i = System.String(Array.ofList('\'' :: mkname i []))
     tyvarno := !tyvarno + 1;
     ref (NoLink (intToName (!tyvarno)), level)
 
-(* Generalize over type variables not free in the context; that is,
-   over those whose level is higher than the current level: *)
+(*
+   Generalize over type variables not free in the context; that is, over those whose level
+   is higher than the current level
+*)
 
 let rec generalize level (t: typ) :typescheme =
     let notfreeincontext tyvar =
@@ -163,27 +166,31 @@ let rec generalize level (t: typ) :typescheme =
     let tvs = List.filter notfreeincontext (freeTypeVars t)
     TypeScheme(unique tvs, t)  // The unique call seems unnecessary because freeTypeVars has no duplicates??
 
-(* Copy a type, replacing bound type variables as dictated by tvenv,
-   and non-bound ones by a copy of the type linked to *)
+(*
+   Copy a type, replacing bound type variables as dictated by tvenv, and non-bound ones by
+   a copy of the type linked to
+*)
 
 let rec copyType subst t :typ =
     match t with
     | TypV tyvar ->
-      let (* Could this be rewritten so that loop does only the substitution *)
-          rec loop subst1 =
-          match subst1 with
-          | (tyvar1, type1) :: rest -> if tyvar1 = tyvar then type1 else loop rest
-          | [] -> match !tyvar with
-                  | (NoLink _, _)  -> t
-                  | (LinkTo t1, _) -> copyType subst t1
-      loop subst
+        // Could this be rewritten so that loop does only the substitution
+        let rec loop subst1 =
+            match subst1 with
+            | (tyvar1, type1) :: rest -> if tyvar1 = tyvar then type1 else loop rest
+            | [] -> match !tyvar with
+                    | (NoLink _, _)  -> t
+                    | (LinkTo t1, _) -> copyType subst t1
+        loop subst
 
     | TypF(t1,t2) -> TypF(copyType subst t1, copyType subst t2)
     | TypI        -> TypI
     | TypB        -> TypB
 
-(* Create a type from a type scheme (tvs, t) by instantiating all the
-   type scheme's parameters tvs with fresh type variables *)
+(*
+   Create a type from a type scheme (tvs, t) by instantiating all the type scheme's
+   parameters tvs with fresh type variables
+*)
 
 let specialize level (TypeScheme(tvs, t)) :typ =
     let bindfresh tv = (tv, TypV(newTypeVar level))
@@ -192,17 +199,16 @@ let specialize level (TypeScheme(tvs, t)) :typ =
     | _  -> let subst = List.map bindfresh tvs
             copyType subst t
 
-(* Pretty-print type, using names 'a, 'b, ... for type variables *)
-
+// Pretty-print type, using names 'a, 'b, ... for type variables
 let rec showType t :string =
     let rec pr t =
         match normType t with
         | TypI         -> "int"
         | TypB         -> "bool"
         | TypV tyvar   ->
-          match !tyvar with
-          | (NoLink name, _) -> name
-          | _                -> failwith "showType impossible"
+            match !tyvar with
+            | (NoLink name, _) -> name
+            | _                -> failwith "showType impossible"
         | TypF(t1, t2) -> "(" + pr t1 + " -> " + pr t2 + ")"
     pr t
 
@@ -210,10 +216,12 @@ let rec showType t :string =
 
 type tenv = typescheme env
 
-(* Type inference helper function:
-   (typ lvl env e) returns the type of e in env at level lvl *)
+(*
+   Type inference helper function:
+   (typ lvl env e) returns the type of e in env at level lvl
+*)
 
-let rec typ (lvl : int) (env : tenv) (e : Expr) :typ =
+let rec private typ (lvl : int) (env : tenv) (e : Expr) :typ =
     match e with
     | CstI i -> TypI
     | CstB b -> TypB
@@ -249,7 +257,7 @@ let rec typ (lvl : int) (env : tenv) (e : Expr) :typ =
       let xTyp = TypV(newTypeVar lvl1)
       let fBodyEnv = (x, TypeScheme([], xTyp)) :: (f, TypeScheme([], fTyp)) :: env
       let rTyp = typ lvl1 fBodyEnv fBody
-      let _    = unify fTyp (TypF(xTyp, rTyp))
+      unify fTyp (TypF(xTyp, rTyp)) |> ignore
       let bodyEnv = (f, generalize lvl fTyp) :: env
       typ lvl bodyEnv letBody
 

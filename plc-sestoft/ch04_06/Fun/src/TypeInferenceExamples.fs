@@ -1,4 +1,4 @@
-module TypedFunExamples
+module TypeInferenceExamples
 
 open Parse
 open TypeInference

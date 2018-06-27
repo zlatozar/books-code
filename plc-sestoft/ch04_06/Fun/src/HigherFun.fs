@@ -9,6 +9,7 @@
       let f x = let g y = x + y in g end in f 6 7 end
  *)
 
+// Chapter 5
 module HigherFun
 
 open Absyn
@@ -45,11 +46,11 @@ let rec eval (e: Expr) (env: Value Env) :Value =
         let bodyEnv = (f, Closure(f, x, fBody, env)) :: env
         eval letBody bodyEnv
 
-    | Call(eFun, eArg) ->                  // new version
-        let fClosure = eval eFun env
+    | Call(eFun, eArg) ->             // new version
+        let fClosure = eval eFun env  // 1. Do not search in env. but execute eFun
         match fClosure with
         | Closure (f, x, fBody, fDeclEnv) ->
-            let xVal = eval eArg env
+            let xVal = eval eArg env  // 2. With the resulted closure extend function body evn.
             let fBodyEnv = (x, xVal) :: (f, fClosure) :: fDeclEnv in eval fBody fBodyEnv
         | _ -> failwith "eval Call: not a function"
 
