@@ -22,8 +22,8 @@ let tex3 =
 let tex4 =
     inferType(fromString
                 @"let tw g = let app x = g (g x) in app end
-                 in let triple y = 3 * y in (tw triple) 11 end
-                 end")
+                    in let triple y = 3 * y in (tw triple) 11 end
+                  end")
 
 let tex5 =
     inferType(fromString
