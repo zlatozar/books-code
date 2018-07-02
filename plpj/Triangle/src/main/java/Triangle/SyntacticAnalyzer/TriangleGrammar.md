@@ -32,7 +32,7 @@ Comment ::= ```!``` Graphic* end-of-line
 Blank ::= space | tab | end-of-line
 
 Graphic ::= Letter | Digit | Op-character | space | tab | ```.``` | ```:``` | ```;``` | ```,``` | <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;```~``` | ```(``` | ```)``` | ```[``` | ```]``` | ```{``` | ```}``` | ```_``` | ```|``` | ```!``` | ```'``` | \` | ```"``` | ```#``` | ```$```
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;```~``` | ```(``` | ```)``` | ```[``` | ```]``` | ```{``` | ```}``` | ```_``` | ```|``` | ```!``` | ```'``` | `\` | ```"``` | ```#``` | ```$```
                       
 Letter ::=  ```A``` | ```B``` | ```C``` | ```D``` | ```E``` | ```F``` | ```G``` | ```H``` | ```I``` | ```J``` | ```K``` | ```L``` | ```M``` | <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;```N``` | ```O``` | ```P``` | ```Q``` | ```R``` | ```S``` | ```T``` | ```U``` | ```V``` | ```W``` | ```X``` | ```Y``` | ```Z``` | <br/>

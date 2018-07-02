@@ -217,6 +217,54 @@ let specialize level (TypeScheme(tvs, t)) :Type =
     | _  -> let subst = List.map bindfresh tvs
             copyType subst t
 
+// Returns the type of 'e' in 'tenv' at level 'lvl'. See rules on p. 104
+let rec typ (lvl: int) (tenv: TEnv) (e: Expr) :Type =
+    match e with
+    | CstI i -> TypI
+    | CstB b -> TypB
+    | Var x  -> specialize lvl (lookup tenv x)
+    | Prim(ope, e1, e2) ->
+        let t1 = typ lvl tenv e1
+        let t2 = typ lvl tenv e2
+        match ope with
+        | "*" -> (unify TypI t1; unify TypI t2; TypI)
+        | "+" -> (unify TypI t1; unify TypI t2; TypI)
+        | "-" -> (unify TypI t1; unify TypI t2; TypI)
+        | "=" -> (unify t1 t2; TypB)
+        | "<" -> (unify TypI t1; unify TypI t2; TypB)
+        | "&" -> (unify TypB t1; unify TypB t2; TypB)
+        | _   -> failwith ("unknown primitive " + ope)  // cover (p1)-(p5)
+
+    | Let(x, eRhs, letBody) ->                          // (p6)
+        let lvl1 = lvl + 1
+        let resTy = typ lvl1 tenv eRhs
+        let letEnv = (x, generalize lvl resTy) :: tenv
+        typ lvl letEnv letBody
+
+    | If(e1, e2, e3) ->                                 // (p7)
+        let t2 = typ lvl tenv e2
+        let t3 = typ lvl tenv e3
+        unify TypB (typ lvl tenv e1)
+        unify t2 t3;
+        t2
+
+    | Letfun(f, x, fBody, letBody) ->                   // (p8)
+        let lvl1 = lvl + 1
+        let fTyp = TypV(newTypeVar lvl1)
+        let xTyp = TypV(newTypeVar lvl1)
+        let fBodyEnv = (x, TypeScheme([], xTyp)) :: (f, TypeScheme([], fTyp)) :: tenv
+        let rTyp = typ lvl1 fBodyEnv fBody
+        unify fTyp (TypF(xTyp, rTyp)) |> ignore
+        let bodyEnv = (f, generalize lvl fTyp) :: tenv
+        typ lvl bodyEnv letBody
+
+    | Call(eFun, eArg) ->                               // (p9)
+        let tf = typ lvl tenv eFun
+        let tx = typ lvl tenv eArg
+        let tr = TypV(newTypeVar lvl)
+        unify tf (TypF(tx, tr))
+        tr
+
 // Pretty-print type, using names 'a, 'b, ... for type variables
 let rec showType t :string =
     let rec pr t =
@@ -229,54 +277,6 @@ let rec showType t :string =
             | _                -> failwith "showType impossible"
         | TypF(t1, t2) -> "(" + pr t1 + " -> " + pr t2 + ")"
     pr t
-
-// Returns the type of 'e' in 'env' at level 'lvl'. See rules on p. 104
-let rec typ (lvl: int) (env: TEnv) (e: Expr) :Type =
-    match e with
-    | CstI i -> TypI
-    | CstB b -> TypB
-    | Var x  -> specialize lvl (lookup env x)
-    | Prim(ope, e1, e2) ->
-        let t1 = typ lvl env e1
-        let t2 = typ lvl env e2
-        match ope with
-        | "*" -> (unify TypI t1; unify TypI t2; TypI)
-        | "+" -> (unify TypI t1; unify TypI t2; TypI)
-        | "-" -> (unify TypI t1; unify TypI t2; TypI)
-        | "=" -> (unify t1 t2; TypB)
-        | "<" -> (unify TypI t1; unify TypI t2; TypB)
-        | "&" -> (unify TypB t1; unify TypB t2; TypB)
-        | _   -> failwith ("unknown primitive " + ope)  // cover (p1)-(p5)
-
-    | Let(x, eRhs, letBody) ->                          // (p6)
-        let lvl1 = lvl + 1
-        let resTy = typ lvl1 env eRhs
-        let letEnv = (x, generalize lvl resTy) :: env
-        typ lvl letEnv letBody
-
-    | If(e1, e2, e3) ->                                 // (p7)
-        let t2 = typ lvl env e2
-        let t3 = typ lvl env e3
-        unify TypB (typ lvl env e1)
-        unify t2 t3;
-        t2
-
-    | Letfun(f, x, fBody, letBody) ->                   // (p8)
-        let lvl1 = lvl + 1
-        let fTyp = TypV(newTypeVar lvl1)
-        let xTyp = TypV(newTypeVar lvl1)
-        let fBodyEnv = (x, TypeScheme([], xTyp)) :: (f, TypeScheme([], fTyp)) :: env
-        let rTyp = typ lvl1 fBodyEnv fBody
-        unify fTyp (TypF(xTyp, rTyp)) |> ignore
-        let bodyEnv = (f, generalize lvl fTyp) :: env
-        typ lvl bodyEnv letBody
-
-    | Call(eFun, eArg) ->                               // (p9)
-        let tf = typ lvl env eFun
-        let tx = typ lvl env eArg
-        let tr = TypV(newTypeVar lvl)
-        unify tf (TypF(tx, tr))
-        tr
 
 // Type inference: returns the type of e0, if any
 let tyinf e0 = typ 0 [] e0
