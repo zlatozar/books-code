@@ -157,7 +157,7 @@ A ```value-or-variable-name``` identifies a value or variable.
 #### Syntax
 
 V-name ::= Identifier rest-of-V-name <br/>
-rest-of-V-name ::= ( ```.``` Identifier  |  ```[``` Expression ```]``` )**\*** <br/>
+rest-of-V-name ::= ( ```.``` Identifier  |  ```[``` Expression ```]``` )* <br/>
                  
 #### Semantics
 

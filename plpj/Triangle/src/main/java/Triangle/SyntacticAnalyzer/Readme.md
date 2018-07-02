@@ -88,10 +88,10 @@ A recursive-descent parser can be _systematically_ developed:
   
 2. Transcribe each EBNF production rule ```N::=X``` to a parsing method parsed, whose body is determined by ```X```.
 
-3. Make the parser consist of:
-   • a private variable ```currentToken```
-   • private parsing methods developed in **step 2**
-   • private auxiliary methods ```accept``` and ```acceptIt```, both of which call the scanner
+3. Make the parser consist of:<br/>
+   • a private variable ```currentToken```<br/>
+   • private parsing methods developed in **step 2**<br/>
+   • private auxiliary methods ```accept``` and ```acceptIt```, both of which call the scanner<br/>
    • public ```parse``` method that calls ```parseS``` (where ```S``` is the start symbol of the grammar),
      having first called the scanner to store the first input token in ```currentToken```.
      

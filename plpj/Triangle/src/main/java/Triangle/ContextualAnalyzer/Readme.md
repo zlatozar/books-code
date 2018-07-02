@@ -3,11 +3,11 @@
 1. Checks whether the source program, represented by its AST, satisfies the
    language's scope rules and type rules.
 
-2. Also decorates the AST as follows:
+2. Also decorates the AST as follows:<br/>
    (a) Each applied occurrence of an identifier or operator is linked to
-       the corresponding declaration of that identifier or operator.
-   (b) Each expression and value-or-variable-name is decorated by its type.
-   (c) Each type identifier is replaced by the type it denotes.
+       the corresponding declaration of that identifier or operator.<br/>
+   (b) Each expression and value-or-variable-name is decorated by its type.<br/>
+   (c) Each type identifier is replaced by the type it denotes.<br/>
  
 3. Standard types are represented by small ASTs.
 
