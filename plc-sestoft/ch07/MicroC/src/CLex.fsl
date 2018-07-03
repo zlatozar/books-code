@@ -7,24 +7,26 @@ module CLex
 open Microsoft.FSharp.Text.Lexing
 open CPar;
 
-let lexemeAsString lexbuf = LexBuffer<char>.LexemeString lexbuf
+let lexemeAsString lexbuf =
+    LexBuffer<char>.LexemeString lexbuf
 
-// Scan reserved words as identifiers and use this function to distinguish them.
-// NOTE: If the set of keywords is large, use a hashtable instead.
+(* Scan keywords as identifiers and use this function to distinguish them. *)
+(* NOTE: If the set of keywords is large, use a hashtable instead.         *)
+
 let keyword s =
     match s with
-    | "int"     -> INT
     | "char"    -> CHAR
-    | "if"      -> IF
     | "else"    -> ELSE
-    | "while"   -> WHILE
-    | "true"    -> CSTBOOL 1
     | "false"   -> CSTBOOL 0
+    | "if"      -> IF
+    | "int"     -> INT
+    | "null"    -> NULL
     | "print"   -> PRINT
     | "println" -> PRINTLN
-    | "void"    -> VOID
-    | "null"    -> NULL
     | "return"  -> RETURN
+    | "true"    -> CSTBOOL 1
+    | "void"    -> VOID
+    | "while"   -> WHILE
     | _         -> NAME s
 
 let cEscape s =
@@ -38,7 +40,7 @@ let cEscape s =
     | "\\v"  -> '\011'
     | "\\f"  -> '\012'
     | "\\r"  -> '\r'
-    | _      -> failwith "Lexer error: impossible mini-C escape"
+    | _      -> failwith "Lexer error: impossible C escape"
 }
 
 rule Token = parse
@@ -47,11 +49,8 @@ rule Token = parse
   | ['0'-'9']+      { CSTINT (System.Int32.Parse (lexemeAsString lexbuf)) }
   | ['a'-'z''A'-'Z']['a'-'z''A'-'Z''0'-'9']*
                     { keyword (lexemeAsString lexbuf) }
-  | '"'             { CSTSTRING (StringDef [] lexbuf) }
 
 (* Punctuation *)
-  | '='             { ASSIGN }
-  | "&"             { AMP }
   | '('             { LPAR }
   | ')'             { RPAR }
   | '{'             { LBRACE }
@@ -60,14 +59,17 @@ rule Token = parse
   | ']'             { RBRACK }
   | ';'             { SEMI }
   | ','             { COMMA }
+  | "//"            { EndLineComment lexbuf; Token lexbuf }
+  | "/*"            { Comment lexbuf; Token lexbuf }
+  | '"'             { CSTSTRING (StringDef [] lexbuf) }
 
-(* Operators *)
+  (* Operators *)
   | '+'             { PLUS }
   | '-'             { MINUS }
   | '*'             { TIMES }
   | '/'             { DIV }
   | '%'             { MOD }
-  | "!"             { NOT }
+  | '='             { ASSIGN }
   | "=="            { EQ }
   | "!="            { NE }
   | '>'             { GT }
@@ -76,21 +78,17 @@ rule Token = parse
   | "<="            { LE }
   | "||"            { SEQOR }
   | "&&"            { SEQAND }
+  | "&"             { AMP }
+  | "!"             { NOT }
 
 (* Blank *)
   | [' ' '\t' '\r'] { Token lexbuf }
   | '\n'            { lexbuf.EndPos <- lexbuf.EndPos.NextLine; Token lexbuf }
 
-(* Comments *)
-  | "//"            { EndLineComment lexbuf; Token lexbuf }
-  | "/*"            { Comment lexbuf;        Token lexbuf }
-
-  | _               { failwith "Lexer error: illegal mini-C symbol" }
-
-// Helper functions that you can reuse in projects
+  | eof             { EOF }
+  | _               { failwith "Lexer error: illegal symbol" }
 
 and Comment = parse
-   | eof            { EOF }
    | "/*"           { Comment lexbuf; Comment lexbuf }
    | "*/"           { () }
    | '\n'           { lexbuf.EndPos <- lexbuf.EndPos.NextLine; Comment lexbuf }
@@ -106,9 +104,9 @@ and StringDef chars = parse
   | '"'
       { Microsoft.FSharp.Core.String.concat "" (List.map string (List.rev chars)) }
   | '\\' ['\\' '"' 'a' 'b' 't' 'n' 'v' 'f' 'r']
-      { String (cEscape (lexemeAsString lexbuf) :: chars) lexbuf }
+      { StringDef (cEscape (lexemeAsString lexbuf) :: chars) lexbuf }
   | "''"
-      { String ('\'' :: chars) lexbuf }
+      { StringDef ('\'' :: chars) lexbuf }
   | '\\'
       { failwith "Lexer error: illegal escape sequence" }
   | (eof | '\026')
@@ -118,4 +116,4 @@ and StringDef chars = parse
   | ['\000'-'\031' '\127' '\255']
       { failwith "Lexer error: invalid character in string" }
   | _
-      { String (char (lexbuf.LexemeChar 0) :: chars) lexbuf }
+      { StringDef (char (lexbuf.LexemeChar 0) :: chars) lexbuf }

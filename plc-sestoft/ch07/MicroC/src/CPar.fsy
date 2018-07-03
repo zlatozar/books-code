@@ -2,7 +2,7 @@
 
 (*
    Parser specification for micro-C, a small imperative language
-   No (real) shift/reduce conflicts thanks to Niels Kokholm.
+   No (real) shift/reduce conflicts.
 *)
 
 open Absyn
@@ -12,9 +12,11 @@ let nl = CstI 10
 
 %}
 
+/* Tokans which carry an associated value of type <type> */
 %token <int> CSTINT CSTBOOL
 %token <string> CSTSTRING NAME
 
+/* Each %token could contain several tokens. There is no precedence. */
 %token CHAR ELSE IF INT NULL PRINT PRINTLN RETURN VOID WHILE
 %token PLUS MINUS TIMES DIV MOD
 %token EQ NE GT LT GE LE
@@ -27,7 +29,7 @@ let nl = CstI 10
 %left SEQOR
 %left SEQAND
 %left EQ NE
-%nonassoc GT LT GE LE
+%nonassoc GT LT GE LE    /* not real shift/reduce error, just forbbid a < b < c */
 %left PLUS MINUS
 %left TIMES DIV MOD
 %nonassoc NOT AMP
@@ -35,6 +37,7 @@ let nl = CstI 10
 
 %start Main
 
+/* It is mandatory for the start rule */
 %type <Absyn.program> Main
 
 %%
@@ -53,16 +56,17 @@ Topdec:
   | Fundec                              { $1 }
 ;
 
+/* See p. 132 */
 Vardec:
     Type Vardesc                        { ((fst $2) $1, snd $2) }
 ;
 
 Vardesc:
-  | NAME                                { ((fun t -> t), $1)                      }
-  | TIMES Vardesc                       { compose1 TypP $2                        }
-  | LPAR Vardesc RPAR                   { $2                                      }
-  | Vardesc LBRACK RBRACK               { compose1 (fun t -> TypA(t, None)) $1    }
-  | Vardesc LBRACK CSTINT RBRACK        { compose1 (fun t -> TypA(t, Some $3)) $1 }
+  | NAME                                { ((fun t -> t), $1)  (* identity function *) }
+  | TIMES Vardesc                       { compose1 (fun t -> TypP t) $2               }
+  | LPAR Vardesc RPAR                   { $2  (* remove brackets and retry *)         }
+  | Vardesc LBRACK RBRACK               { compose1 (fun t -> TypA(t, None)) $1        }
+  | Vardesc LBRACK CSTINT RBRACK        { compose1 (fun t -> TypA(t, Some $3)) $1     }
 ;
 
 Fundec:

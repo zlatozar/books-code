@@ -1,13 +1,9 @@
-(* File MicroC/Machine.fs 
-
+(*
    Instructions and code emission for a stack-based
-   abstract machine * sestoft@itu.dk 2009-09-23
 
-   Implementations of the machine are found in file MicroC/Machine.java 
+   Implementations of the machine are found in file MicroC/Machine.java
    and MicroC/machine.c.
-   
-   Must precede Comp.fs and Contcomp.fs in the VS Solution Explorer.
- *)
+*)
 
 module Machine
 
@@ -44,7 +40,7 @@ type instr =
 
 (* Generate new distinct labels *)
 
-let (resetLabels, newLabel) = 
+let (resetLabels, newLabel) =
     let lastlab = ref -1
     ((fun () -> lastlab := 0), (fun () -> (lastlab := 1 + !lastlab; "L" + (!lastlab).ToString())))
 
@@ -52,51 +48,53 @@ let (resetLabels, newLabel) =
 
 type 'data env = (string * 'data) list
 
-let rec lookup env x = 
-    match env with 
+let rec lookup env x =
+    match env with
     | []         -> failwith (x + " not found")
     | (y, v)::yr -> if x=y then v else lookup yr x
 
-(* An instruction list is emitted in two phases:
-   * pass 1 builds an environment labenv mapping labels to addresses 
-   * pass 2 emits the code to file, using the environment labenv to 
-     resolve labels
- *)
+(*
+   An instruction list is emitted in two phases:
+     - pass 1 builds an environment labenv mapping labels to addresses
+     - pass 2 emits the code to file, using the environment labenv to
+       resolve labels
+*)
 
 (* These numeric instruction codes must agree with Machine.java: *)
 
-let CODECSTI   = 0 
-let CODEADD    = 1 
-let CODESUB    = 2 
-let CODEMUL    = 3 
-let CODEDIV    = 4 
-let CODEMOD    = 5 
-let CODEEQ     = 6 
-let CODELT     = 7 
-let CODENOT    = 8 
-let CODEDUP    = 9 
-let CODESWAP   = 10 
-let CODELDI    = 11 
-let CODESTI    = 12 
-let CODEGETBP  = 13 
-let CODEGETSP  = 14 
-let CODEINCSP  = 15 
+let CODECSTI   = 0
+let CODEADD    = 1
+let CODESUB    = 2
+let CODEMUL    = 3
+let CODEDIV    = 4
+let CODEMOD    = 5
+let CODEEQ     = 6
+let CODELT     = 7
+let CODENOT    = 8
+let CODEDUP    = 9
+let CODESWAP   = 10
+let CODELDI    = 11
+let CODESTI    = 12
+let CODEGETBP  = 13
+let CODEGETSP  = 14
+let CODEINCSP  = 15
 let CODEGOTO   = 16
 let CODEIFZERO = 17
-let CODEIFNZRO = 18 
+let CODEIFNZRO = 18
 let CODECALL   = 19
 let CODETCALL  = 20
 let CODERET    = 21
-let CODEPRINTI = 22 
+let CODEPRINTI = 22
 let CODEPRINTC = 23
 let CODELDARGS = 24
 let CODESTOP   = 25;
 
-(* Bytecode emission, first pass: build environment that maps 
+(*
+   Bytecode emission, first pass: build environment that maps
    each label to an integer address in the bytecode.
- *)
+*)
 
-let makelabenv (addr, labenv) instr = 
+let makelabenv (addr, labenv) instr =
     match instr with
     | Label lab      -> (addr, (lab, addr) :: labenv)
     | CSTI i         -> (addr+2, labenv)
@@ -128,7 +126,7 @@ let makelabenv (addr, labenv) instr =
 
 (* Bytecode emission, second pass: output bytecode as integers *)
 
-let rec emitints getlab instr ints = 
+let rec emitints getlab instr ints =
     match instr with
     | Label lab      -> ints
     | CSTI i         -> CODECSTI   :: i :: ints
@@ -158,12 +156,13 @@ let rec emitints getlab instr ints =
     | LDARGS         -> CODELDARGS :: ints
     | STOP           -> CODESTOP   :: ints
 
-(* Convert instruction list to int list in two passes:
-   Pass 1: build label environment
-   Pass 2: output instructions using label environment
+(*
+   Convert instruction list to int list in two passes:
+     Pass 1: build label environment
+     Pass 2: output instructions using label environment
  *)
 
-let code2ints (code : instr list) : int list =
+let code2ints (code: instr list) :int list =
     let (_, labenv) = List.fold makelabenv (0, []) code
     let getlab lab = lookup labenv lab
     List.foldBack (emitints getlab) code []

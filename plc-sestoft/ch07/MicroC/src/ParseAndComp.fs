@@ -1,4 +1,4 @@
-(* File MicroC/ParseAndComp.fs *)
+(* See Readme.txt how to use it *)
 
 module ParseAndComp
 

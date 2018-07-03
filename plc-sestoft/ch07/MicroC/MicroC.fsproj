@@ -6,14 +6,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Chapter 7 -->
+    <!-- Chapter 7 (parsing and interpretation) -->
     <Compile Include="src/Absyn.fs" />
     <Compile Include="src/CPar.fs" />
     <Compile Include="src/CLex.fs" />
     <Compile Include="src/Parse.fs" />
+    <Compile Include="src/ParseExamples.fs" />
     <Compile Include="src/Interp.fs" />
+    <Compile Include="src/ParseAndRun.fs" />
+
+    <!-- Chapter 8 (machine definition and compilation) -->
     <Compile Include="src/Machine.fs" />
     <Compile Include="src/Comp.fs" />
+    <Compile Include="src/ParseAndComp.fs" />
+
+    <!-- Chapter 11 (compile with continuations) -->
+    <Compile Include="src/Contcomp.fs" />
+    <Compile Include="src/ParseAndContcomp.fs" />
+    <Compile Include="src/MicroCC.fs" />
 
     <Compile Include="src/Program.fs" />
     <None Include="Readme.txt" />
