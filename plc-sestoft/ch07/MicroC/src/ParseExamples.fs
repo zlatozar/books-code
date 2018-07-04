@@ -25,21 +25,21 @@ let ex2 =
 // micro-C example 2
 
 void main() {
-  int *p;                               // pointer to int
-  int i;                                // int
-  int ia[10];                           // array of 10 ints
-  int* ia2;                             // pointer to int
-  int *ipa[10];                         // array of 10 pointers to int
-  int (*iap)[10];                       // pointer to array of 10 ints
-  print i;                              // ~1
+  int *p;                               // pointer to int   => Dec (TypP TypI, 'p')
+  int i;                                // int              => Dec (TypI,'i');
+  int ia[10];                           // array of 10 ints => Dec (TypA (TypI,Some 10),'ia');
+  int* ia2;                             // pointer to int   => Dec (TypP TypI,'ia2');
+  int *ipa[10];                         // array of 10 pointers to int =>  Dec (TypA (TypP TypI,Some 10),'ipa');
+  int (*iap)[10];                       // pointer to array of 10 ints => Dec (TypP (TypA (TypI,Some 10)),'iap');
+  print i;                              // ~1                 => Stmt (Expr (Prim1 ('printi',Access (AccVar 'i'))));
   print p;                              // ~1
-  p = &i;                               // now p points to i
+  p = &i;                               // now p points to i  => Stmt (Expr (Assign (AccVar 'p',Addr (AccVar 'i'))));
   print p;                              // 1
-  ia2 = ia;                             // now ia2 points to ia[0]
+  ia2 = ia;                             // now ia2 points to ia[0] =>  Stmt (Expr (Assign (AccVar 'ia2',Access (AccVar 'ia'))));
   print *ia2;                           // ~1
   *p = 227;                             // now i is 227
   print p; print i;                     // 1 227
-  *&i = 12;                             // now i is 12
+  *&i = 12;                             // now i is 12        => Stmt (Expr (Assign (AccDeref (Addr (AccVar 'i')),CstI 12)));
   print i;                              // 12
   p = &*p;                              // no change
   print *p;                             // 12
@@ -53,6 +53,22 @@ void main() {
   print (&*ipa[2] == &**(ipa+2));       // 1 (true)
   iap = &ia;                            // now iap points to ia
   print (&(*iap)[2] == &*((*iap)+2));   // 1 (true)
+
+  /* last one:
+  Stmt
+             (Expr
+                (Prim1
+                   ('printi',
+                    Prim2
+                      ('==',
+                       Addr
+                         (AccIndex (AccDeref (Access (AccVar 'iap')),CstI 2)),
+                       Addr
+                         (AccDeref
+                            (Prim2
+                               ('+',Access (AccDeref (Access (AccVar 'iap'))),
+                                CstI 2)))))))
+  */
 }
 "
 

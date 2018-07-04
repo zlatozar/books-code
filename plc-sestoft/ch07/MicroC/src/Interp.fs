@@ -6,7 +6,7 @@
    array).
      - The environment maps a variable to an address (location), and the store maps a
    location to an integer. This freely permits pointer arithmetics, as in real C.
-     - Expressions can have side effects.
+     - Expressions can have side effects (could change store)
      - A function takes a list of typed arguments and may optionally return a result.
      - For now, arrays can be one-dimensional only.  For simplicity, we represent an array
    as a variable which holds the address of the first array element.  This is consistent
@@ -16,7 +16,8 @@
      - The store behaves as a stack, so all data are stack allocated: variables, function
        parameters and arrays.
 
-     - The return statement is not implemented (for simplicity), so all functions should
+   IMPORTANT:
+   The return statement is not implemented (for simplicity), so all functions should
    have return type void.  But there is as yet no typecheck, so be careful.
  *)
 
@@ -33,32 +34,40 @@ let rec lookup env x =
     | []         -> failwith (x + " not found")
     | (y, v)::yr -> if x=y then v else lookup yr x
 
-(* A local variable environment also knows the next unused store location *)
+(* A local variable environment also knows the next unused store location(int) *)
 
+// Visualize:
+//          [ ((string, int), int); ((string, int), int);.... ]
 type locEnv = int env * int
 
 (* A function environment maps a function name to parameter list and body *)
 
 type paramdecs = (typ * string) list
 
+// Visualize:
+//          [ ( [ (typ, string); (typ, string);... ], stmt ); ( [paramdecs...], stmt );.... ]
 type funEnv = (paramdecs * stmt) env
 
 // A global environment consists of a global variable environment and a global function
-// environment
+// environment (because program is declarations and functions)
+
+// Visualize:
+//          [ ( (string, int), [ ( [ (typ, string); (typ, string);... ], stmt ); ( [paramdecs...], stmt );.... ]  ); ( (string, int), funEnv );.... ]
 type gloEnv = int env * funEnv
 
-(* The store maps addresses (ints) to values (ints): *)
+type address = int   // type alias
 
-type address = int
+(* The store maps addresses (ints) to values (ints) *)
 
-type store = Map<address,int>
+type store = Map<address, int>
 
-let emptyStore = Map.empty<address,int>
+let emptyStore = Map.empty<address, int>
 
 let setSto (store: store) addr value = store.Add(addr, value)
 
-let getSto (store: store) addr = store.Item addr
+let getSto (store: store) addr = store.Item addr  // obtain value from map(store)
 
+// All n items are set to -999
 let rec initSto loc n store = if n=0 then store
                               else initSto (loc+1) (n-1) (setSto store loc -999)
 
@@ -135,6 +144,9 @@ and stmtordec stmtordec locEnv gloEnv store =
     match stmtordec with
     | Stmt stmt   -> (locEnv, exec stmt locEnv gloEnv store)
     | Dec(typ, x) -> allocate (typ, x) locEnv store
+
+// _____________________________________________________________________________
+//                                                            Eval (main logic)
 
 // Evaluate an expression and produce a result(an integer) and updated store
 and eval e locEnv gloEnv store :int * store =
@@ -213,7 +225,7 @@ and callfun f es locEnv gloEnv store :int * store =
     let (fBodyEnv, store2) =
         bindVars (List.map snd paramdecs) vs (varEnv, nextloc) store1
     let store3 = exec fBody fBodyEnv gloEnv store2
-    (-111, store3)
+    (-111, store3)   // do not return value, just change store
 
 // _____________________________________________________________________________
 //                                                                         Main

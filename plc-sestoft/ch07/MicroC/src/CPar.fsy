@@ -8,7 +8,7 @@
 open Absyn
 
 let compose1 f (g, s) = ((fun x -> g(f(x))), s)
-let nl = CstI 10
+let nl = CstI 10     // 10 is the ASCII code for new line
 
 %}
 

@@ -13,6 +13,7 @@
     <Compile Include="src/Parse.fs" />
     <Compile Include="src/ParseExamples.fs" />
     <Compile Include="src/Interp.fs" />
+    <Compile Include="src/InterpExamples.fs" />
     <Compile Include="src/ParseAndRun.fs" />
 
     <!-- Chapter 8 (machine definition and compilation) -->
