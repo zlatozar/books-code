@@ -14,7 +14,10 @@
    variables were handled in the B language), but not with the way array-type variables
    are handled in C.
      - The store behaves as a stack, so all data are stack allocated: variables, function
-       parameters and arrays.
+   parameters and arrays.
+
+   NOTE: Many time you will see store0, env0 etc. this is because data in F# is immutable
+   and new one should be returned
 
    IMPORTANT:
    The return statement is not implemented (for simplicity), so all functions should
@@ -37,7 +40,7 @@ let rec lookup env x =
 (* A local variable environment also knows the next unused store location(int) *)
 
 // Visualize:
-//          [ ((string, int), int); ((string, int), int);.... ]
+//          ( [(string, int); (string, int);....], address )
 type locEnv = int env * int
 
 (* A function environment maps a function name to parameter list and body *)
@@ -45,14 +48,14 @@ type locEnv = int env * int
 type paramdecs = (typ * string) list
 
 // Visualize:
-//          [ ( [ (typ, string); (typ, string);... ], stmt ); ( [paramdecs...], stmt );.... ]
+//          [(string, ([(typ,string);(typ,string)...], stmt)); (string, ([paramdecs], stmt);....)]
 type funEnv = (paramdecs * stmt) env
 
 // A global environment consists of a global variable environment and a global function
 // environment (because program is declarations and functions)
 
-// Visualize:
-//          [ ( (string, int), [ ( [ (typ, string); (typ, string);... ], stmt ); ( [paramdecs...], stmt );.... ]  ); ( (string, int), funEnv );.... ]
+// Visualize: ([global variable environment],  [global function environment]) =>
+//            ([(string, int); (string, int)], [(string, ([(typ,string);(typ,string)...], stmt)); (string, ([paramdecs], stmt);....)])
 type gloEnv = int env * funEnv
 
 type address = int   // type alias
@@ -80,6 +83,7 @@ let bindVar x v (env, nextloc) store :locEnv * store =
     let env1 = (x, nextloc) :: env
     ((env1, nextloc + 1), setSto store nextloc v)
 
+// Bind names 'xs' to given values 'vs'
 let rec bindVars xs vs locEnv store :locEnv * store =
     match (xs, vs) with
     | ([], [])         -> (locEnv, store)
@@ -90,16 +94,16 @@ let rec bindVars xs vs locEnv store :locEnv * store =
 
 // Allocate variable (int or pointer or array): extend environment so that it maps variable
 // to next available store location, and initialize store location(s).
-let rec allocate (typ, x) (env0, nextloc) sto0 :locEnv * store =
-    let (nextloc1, v, sto1) =
-        match typ with
-        | TypA (t, Some i) -> (nextloc + i, nextloc, initSto nextloc i sto0)
-        | _ -> (nextloc, -1, sto0)
-    bindVar x v (env0, nextloc1) sto1
+let rec allocate (typ, x) (locEnv, nextloc) sto0 :locEnv * store =
+    let (nextloc1, v, sto1) = match typ with
+                              | TypA (t, Some i) -> (nextloc + i, nextloc, initSto nextloc i sto0)
+                              | _ -> (nextloc, -1, sto0)
+    bindVar x v (locEnv, nextloc1) sto1
 
 // Build global environment of variables and functions.  For global variables, store
 // locations are reserved; for global functions, just add to global function environment.
 let initEnvAndStore (topdecs: topdec list) :locEnv * funEnv * store =
+
     let rec addv decs locEnv funEnv store =
         match decs with
         | [] -> (locEnv, funEnv, store)
@@ -108,6 +112,7 @@ let initEnvAndStore (topdecs: topdec list) :locEnv * funEnv * store =
             addv decr locEnv1 funEnv sto1
         | Fundec (_, f, xs, body) :: decr ->
             addv decr locEnv ((f, (xs, body)) :: funEnv) store
+
     addv topdecs ([], 0) [] emptyStore
 
 // _____________________________________________________________________________
@@ -120,21 +125,26 @@ let rec exec stmt (locEnv: locEnv) (gloEnv: gloEnv) (store: store) :store =
         let (v, store1) = eval e locEnv gloEnv store
         if v<>0 then exec stmt1 locEnv gloEnv store1
                 else exec stmt2 locEnv gloEnv store1
+
     | While(e, body) ->
+
         let rec loop store1 =
             let (v, store2) = eval e locEnv gloEnv store1
             if v<>0
               then loop (exec body locEnv gloEnv store2)
               else store2
+
         loop store
     | Expr e ->
         let (_, store1) = eval e locEnv gloEnv store
         store1
     | Block stmts ->
+
         let rec loop ss (locEnv, store) =
             match ss with
             | [ ] -> store
             | s1::sr -> loop sr (stmtordec s1 locEnv gloEnv store)
+
         loop stmts (locEnv, store)
     | Return _ -> failwith "return not implemented"
 
@@ -153,11 +163,11 @@ and eval e locEnv gloEnv store :int * store =
     match e with
     | Access acc     -> let (loc, store1) = access acc locEnv gloEnv store
                         (getSto store1 loc, store1)
-    | Assign(acc, e) -> let (loc, store1) = access acc locEnv gloEnv store
+    | Assign(acc, e) -> let (loc, store1) = access acc locEnv gloEnv store  // e.g. Assign (AccVar 'p',Addr (AccVar 'i'))
                         let (res, store2) = eval e locEnv gloEnv store1
                         (res, setSto store2 loc res)
     | CstI i         -> (i, store)
-    | Addr acc       -> access acc locEnv gloEnv store
+    | Addr acc       -> access acc locEnv gloEnv store  // e.g Addr (AccVar 'i')
     | Prim1(ope, e1) ->
         let (i1, store1) = eval e1 locEnv gloEnv store
         let res =
@@ -195,15 +205,16 @@ and eval e locEnv gloEnv store :int * store =
         if i1<>0
           then res
           else eval e2 locEnv gloEnv store1
-    | Call(f, es) -> callfun f es locEnv gloEnv store
+    | Call(f, exprs) -> callfun f exprs locEnv gloEnv store  // Call ("fac",  [Prim2 ("-",Access (AccVar "n"),CstI 1);....
+
 
 // Evaluate access expression an produce an address(index in the store)
 // and an updated store
 and access acc locEnv gloEnv store :int * store =
     match acc with
     | AccVar x           -> (lookup (fst locEnv) x, store)
-    | AccDeref e         -> eval e locEnv gloEnv store
-    | AccIndex(acc, idx) ->
+    | AccDeref e         -> eval e locEnv gloEnv store     // AccDeref (Addr (AccVar 'i'))
+    | AccIndex(acc, idx) ->                                // AccIndex (AccDeref (Access (AccVar 'iap')),CstI 2)
         let (a, store1) = access acc locEnv gloEnv store
         let aval = getSto store1 a
         let (i, store2) = eval idx locEnv gloEnv store1
@@ -217,24 +228,29 @@ and evals es locEnv gloEnv store :int list * store =
         let (vr, storer) = evals er locEnv gloEnv store1
         (v1::vr, storer)
 
-and callfun f es locEnv gloEnv store :int * store =
+and callfun f exprs locEnv gloEnv store :int * store =
     let (_, nextloc) = locEnv
-    let (varEnv, funEnv) = gloEnv
+    let (varEnv, funEnv) = gloEnv    // !!
     let (paramdecs, fBody) = lookup funEnv f
-    let (vs, store1) = evals es locEnv gloEnv store
+    let (values, store1) = evals exprs locEnv gloEnv store
     let (fBodyEnv, store2) =
-        bindVars (List.map snd paramdecs) vs (varEnv, nextloc) store1
+        bindVars (List.map snd paramdecs) values (varEnv, nextloc) store1
+
     let store3 = exec fBody fBodyEnv gloEnv store2
-    (-111, store3)   // do not return value, just change store
+    (-111, store3)   // do not return value, just changed store
 
 // _____________________________________________________________________________
 //                                                                         Main
 
 // Interpret a complete micro-C program by initializing the store
 // and global environments, then invoking its `main' function.
-let run (Prog topdecs) vs =
+let run (Prog topdecs) values =
     let ((varEnv, nextloc), funEnv, store0) = initEnvAndStore topdecs
     let (mainParams, mainBody) = lookup funEnv "main"
+
+    // take parameters names and map them to given values
     let (mainBodyEnv, store1) =
-        bindVars (List.map snd mainParams) vs (varEnv, nextloc) store0
+        bindVars (List.map snd mainParams) values (varEnv, nextloc) store0
+
+    // function call, call 'main'
     exec mainBody mainBodyEnv (varEnv, funEnv) store1
