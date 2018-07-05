@@ -36,8 +36,6 @@ open System.IO
 open Absyn
 open Machine
 
-(* ------------------------------------------------------------------- *)
-
 (* Simple environment operations *)
 
 type 'data env = (string * 'data) list
@@ -56,56 +54,57 @@ type var =
 (* The variable environment keeps track of global and local variables, and
    keeps track of next available offset for local variables *)
 
+// Visualize:
+//          ([(string, (var,typ));(string, (var,typ));...], next offset(int))
 type varEnv = (var * typ) env * int
 
 (* The function environment maps function name to label and parameter decs *)
 
 type paramdecs = (typ * string) list
+
+// Visualize:
+//          [(string, (label, typ?, [(typ,string);(typ,string)...])); (string,(label * typ option * paramdecs));.... ]
 type funEnv = (label * typ option * paramdecs) env
 
-(* Bind declared variable in env and generate code to allocate it: *)
-
-let allocate (kind : int -> var) (typ, x) (varEnv : varEnv) : varEnv * instr list =
+// Bind declared variable in env and generate code to allocate it
+let allocate (kind: int -> var) (typ, x) (varEnv: varEnv) :varEnv * instr list =
     let (env, fdepth) = varEnv
     match typ with
     | TypA (TypA _, _) ->
         raise (Failure "allocate: array of arrays not permitted")
     | TypA (t, Some i) ->
-        let newEnv = ((x, (kind (fdepth+i), typ)) :: env, fdepth+i+1)
-        let code = [INCSP i; GETSP; CSTI (i-1); SUB]
+        let newEnv = ((x, (kind (fdepth + i), typ)) :: env, fdepth + i + 1)
+        let code = [INCSP i; GETSP; CSTI (i - 1); SUB]
         (newEnv, code)
     | _ ->
-        let newEnv = ((x, (kind (fdepth), typ)) :: env, fdepth+1)
+        let newEnv = ((x, (kind (fdepth), typ)) :: env, fdepth + 1)
         let code = [INCSP 1]
         (newEnv, code)
 
-(* Bind declared parameters in env: *)
-
+// Bind declared parameters in env
 let bindParam (env, fdepth) (typ, x)  : varEnv =
-    ((x, (Locvar fdepth, typ)) :: env , fdepth+1)
+    ((x, (Locvar fdepth, typ)) :: env , fdepth + 1)
 
 let bindParams paras ((env, fdepth) : varEnv) : varEnv =
     List.fold bindParam (env, fdepth) paras;
 
-(* ------------------------------------------------------------------- *)
-
-(* Build environments for global variables and functions *)
-
-let makeGlobalEnvs (topdecs : topdec list) : varEnv * funEnv * instr list =
+// Build environments for global variables and functions
+let makeGlobalEnvs (topdecs: topdec list) :varEnv * funEnv * instr list =
     let rec addv decs varEnv funEnv =
         match decs with
         | []         -> (varEnv, funEnv, [])
         | dec::decr  ->
-          match dec with
-          | Vardec (typ, var) ->
-              let (varEnv1, code1)          = allocate Glovar (typ, var) varEnv
-              let (varEnvr, funEnvr, coder) = addv decr varEnv1 funEnv
-              (varEnvr, funEnvr, code1 @ coder)
-          | Fundec (tyOpt, f, xs, body) ->
-              addv decr varEnv ((f, (newLabel(), tyOpt, xs)) :: funEnv)
+            match dec with
+            | Vardec (typ, var) ->
+                let (varEnv1, code1)          = allocate Glovar (typ, var) varEnv
+                let (varEnvr, funEnvr, coder) = addv decr varEnv1 funEnv
+                (varEnvr, funEnvr, code1 @ coder)
+            | Fundec (tyOpt, f, xs, body) ->
+                addv decr varEnv ((f, (newLabel(), tyOpt, xs)) :: funEnv)
     addv topdecs ([], 0) []
 
-(* ------------------------------------------------------------------- *)
+// _____________________________________________________________________________
+//                                                     Compilation (see p. 149)
 
 (* Compiling micro-C statements:
    * stmt    is the statement to compile
@@ -113,26 +112,28 @@ let makeGlobalEnvs (topdecs : topdec list) : varEnv * funEnv * instr list =
    * funEnv  is the global function environment
 *)
 
-let rec cStmt stmt (varEnv : varEnv) (funEnv : funEnv) : instr list =
+// Mapping scheme p. 151
+let rec cStmt stmt (varEnv: varEnv) (funEnv: funEnv) :instr list =
     match stmt with
-    | If(e, stmt1, stmt2) ->
-        let labelse = newLabel()
-        let labend  = newLabel()
-        cExpr e varEnv funEnv @ [IFZERO labelse]
-        @ cStmt stmt1 varEnv funEnv @ [GOTO labend]
-        @ [Label labelse] @ cStmt stmt2 varEnv funEnv
-        @ [Label labend]
+    | If(expr, stmt1, stmt2) ->
+        let labElse = newLabel()
+        let labEnd  = newLabel()
+        cExpr expr varEnv funEnv @ [IFZERO labElse]
+        @ cStmt stmt1 varEnv funEnv @ [GOTO labEnd]
+        @ [Label labElse] @ cStmt stmt2 varEnv funEnv
+        @ [Label labEnd]
 
-    | While(e, body) ->
-        let labbegin = newLabel()
-        let labtest  = newLabel()
-        [GOTO labtest; Label labbegin] @ cStmt body varEnv funEnv
-        @ [Label labtest] @ cExpr e varEnv funEnv @ [IFNZRO labbegin]
+    | While(expr, body) ->
+        let labBegin = newLabel()
+        let labTest  = newLabel()
+        [GOTO labTest; Label labBegin] @ cStmt body varEnv funEnv
+        @ [Label labTest] @ cExpr expr varEnv funEnv @ [IFNZRO labBegin]
 
-    | Expr e ->
-        cExpr e varEnv funEnv @ [INCSP -1]
+    | Expr expr ->
+        cExpr expr varEnv funEnv @ [INCSP -1]
 
     | Block stmts ->
+
         let rec loop stmts varEnv =
           match stmts with
           | []     -> (snd varEnv, [])
@@ -140,6 +141,7 @@ let rec cStmt stmt (varEnv : varEnv) (funEnv : funEnv) : instr list =
               let (varEnv1, code1) = cStmtOrDec s1 varEnv funEnv
               let (fdepthr, coder) = loop sr varEnv1
               (fdepthr, code1 @ coder)
+
         let (fdepthend, code) = loop stmts varEnv
         code @ [INCSP(snd varEnv - fdepthend)]
 
@@ -148,25 +150,26 @@ let rec cStmt stmt (varEnv : varEnv) (funEnv : funEnv) : instr list =
     | Return (Some e) ->
         cExpr e varEnv funEnv @ [RET (snd varEnv)]
 
-and cStmtOrDec stmtOrDec (varEnv : varEnv) (funEnv : funEnv) : varEnv * instr list =
+and cStmtOrDec stmtOrDec (varEnv: varEnv) (funEnv: funEnv) :varEnv * instr list =
     match stmtOrDec with
     | Stmt stmt    -> (varEnv, cStmt stmt varEnv funEnv)
     | Dec (typ, x) -> allocate Locvar (typ, x) varEnv
 
 (* Compiling micro-C expressions:
 
-   * e       is the expression to compile
-   * varEnv  is the local and gloval variable environment
-   * funEnv  is the global function environment
+   - expr    is the expression to compile
+   - varEnv  is the local and gloval variable environment
+   - funEnv  is the global function environment
 
-   Net effect principle: if the compilation (cExpr e varEnv funEnv) of
-   expression e returns the instruction sequence instrs, then the
-   execution of instrs will leave the rvalue of expression e on the
+   ATTENTION:
+   Net effect principle: if the compilation (cExpr expr varEnv funEnv) of
+   expression expr returns the instruction sequence instrs, then the
+   execution of instrs will leave the rvalue of expression expr on the
    stack top (and thus extend the current stack frame with one element).
 *)
 
-and cExpr (e : expr) (varEnv : varEnv) (funEnv : funEnv) : instr list =
-    match e with
+and cExpr (expr :expr) (varEnv: varEnv) (funEnv: funEnv) :instr list =
+    match expr with
     | Access acc     -> cAccess acc varEnv funEnv @ [LDI]
     | Assign(acc, e) -> cAccess acc varEnv funEnv @ cExpr e varEnv funEnv @ [STI]
     | CstI i         -> [CSTI i]
@@ -210,10 +213,9 @@ and cExpr (e : expr) (varEnv : varEnv) (funEnv : funEnv) : instr list =
         @ [GOTO labend; Label labtrue; CSTI 1; Label labend]
     | Call(f, es) -> callfun f es varEnv funEnv
 
-(* Generate code to access variable, dereference pointer or index array.
-   The effect of the compiled code is to leave an lvalue on the stack.   *)
-
-and cAccess access varEnv funEnv : instr list =
+// Generate code to access variable, dereference pointer or index array.
+// The effect of the compiled code is to leave an lvalue on the stack.
+and cAccess access varEnv funEnv :instr list =
     match access with
     | AccVar x ->
         match lookup (fst varEnv) x with
@@ -223,14 +225,12 @@ and cAccess access varEnv funEnv : instr list =
     | AccIndex(acc, idx) -> cAccess acc varEnv funEnv
                             @ [LDI] @ cExpr idx varEnv funEnv @ [ADD]
 
-(* Generate code to evaluate a list es of expressions: *)
+// Generate code to evaluate a list es of expressions
+and cExprs es varEnv funEnv :instr list =
+    List.concat (List.map (fun e -> cExpr e varEnv funEnv) es)
 
-and cExprs es varEnv funEnv : instr list =
-    List.concat(List.map (fun e -> cExpr e varEnv funEnv) es)
-
-(* Generate code to evaluate arguments es and then call function f: *)
-
-and callfun f es varEnv funEnv : instr list =
+// Generate code to evaluate arguments es and then call function f
+and callfun f es varEnv funEnv :instr list =
     let (labf, tyOpt, paramdecs) = lookup funEnv f
     let argc = List.length es
     if argc = List.length paramdecs then
@@ -238,9 +238,7 @@ and callfun f es varEnv funEnv : instr list =
     else
       raise (Failure (f + ": parameter/argument mismatch"))
 
-
-(* Compile a complete micro-C program: globals, call to main, functions *)
-
+// Compile a complete micro-C program: globals, call to main, functions
 let cProgram (Prog topdecs) : instr list =
     let _ = resetLabels ()
     let ((globalVarEnv, _), funEnv, globalInit) = makeGlobalEnvs topdecs

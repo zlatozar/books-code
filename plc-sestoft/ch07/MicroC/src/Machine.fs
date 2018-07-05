@@ -1,5 +1,5 @@
 (*
-   Instructions and code emission for a stack-based
+   Instructions and code emission for a stack-based machine
 
    Implementations of the machine are found in file MicroC/Machine.java
    and MicroC/machine.c.
@@ -31,18 +31,19 @@ type instr =
   | IFZERO of label                    (* go to label if s[sp] == 0       *)
   | IFNZRO of label                    (* go to label if s[sp] != 0       *)
   | CALL of int * label                (* move m args up 1, push pc, jump *)
-  | TCALL of int * int * label         (* move m args down n, jump        *)
+  | TCALL of int * int * label         (* move m args down n, jump(Ch. 11)*)
   | RET of int                         (* pop m and return to s[sp]       *)
   | PRINTI                             (* print s[sp] as integer          *)
   | PRINTC                             (* print s[sp] as character        *)
   | LDARGS                             (* load command line args on stack *)
   | STOP                               (* halt the abstract machine       *)
 
-(* Generate new distinct labels *)
-
+// Generate new distinct labels
 let (resetLabels, newLabel) =
     let lastlab = ref -1
-    ((fun () -> lastlab := 0), (fun () -> (lastlab := 1 + !lastlab; "L" + (!lastlab).ToString())))
+    ((fun () -> lastlab := 0),
+     (fun () -> (lastlab := 1 + !lastlab;
+                 "L" + (!lastlab).ToString())))
 
 (* Simple environment operations *)
 
@@ -60,7 +61,8 @@ let rec lookup env x =
        resolve labels
 *)
 
-(* These numeric instruction codes must agree with Machine.java: *)
+// _____________________________________________________________________________
+//                 These numeric instruction codes must agree with Machine.java
 
 let CODECSTI   = 0
 let CODEADD    = 1
@@ -87,13 +89,10 @@ let CODERET    = 21
 let CODEPRINTI = 22
 let CODEPRINTC = 23
 let CODELDARGS = 24
-let CODESTOP   = 25;
+let CODESTOP   = 25
 
-(*
-   Bytecode emission, first pass: build environment that maps
-   each label to an integer address in the bytecode.
-*)
-
+// Bytecode emission, first pass: build environment that maps
+// each label to an integer address in the bytecode.
 let makelabenv (addr, labenv) instr =
     match instr with
     | Label lab      -> (addr, (lab, addr) :: labenv)
@@ -124,8 +123,7 @@ let makelabenv (addr, labenv) instr =
     | LDARGS         -> (addr+1, labenv)
     | STOP           -> (addr+1, labenv)
 
-(* Bytecode emission, second pass: output bytecode as integers *)
-
+// Bytecode emission, second pass: output bytecode as integers
 let rec emitints getlab instr ints =
     match instr with
     | Label lab      -> ints
