@@ -11,6 +11,8 @@
 [<RequireQualifiedAccess>]
 module Result =
 
+    // See: https://fsharpforfunandprofit.com/posts/elevated-world/
+
     /// Pass in a function to handle each case of `Result`
     let bimap onSuccess onError xR = 
         match xR with

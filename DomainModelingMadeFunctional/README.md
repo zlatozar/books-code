@@ -14,3 +14,12 @@ After downloading this code, do the following:
 
 * Run `dotnet build` to download all the NuGet packages and compile the project
 
+## Additional articles
+
+https://habr.com/post/337880/
+
+https://fsharpforfunandprofit.com/posts/recipe-part3/
+
+https://fsharpforfunandprofit.com/posts/elevated-world/
+
+https://fsharpforfunandprofit.com/posts/serializating-your-domain-model/
