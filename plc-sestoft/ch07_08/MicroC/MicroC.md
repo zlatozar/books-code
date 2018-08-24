@@ -27,15 +27,14 @@ Program ::= (Token | Comment | Blank)*
 
 \<Blank\>           **::=** space | tab | EOF
 
-\<Graphic\>      **::=** \<Letter\> | \<Digit\> | \<Op-character\> | space | tab | \<ASCII
-visible character\>
+\<Graphic\>      **::=** \<Letter\> | \<Digit\> | \<Op-character\> | space | tab | \<ASCII visible character\>
 
 \<GraphicWithEscape\> **::=** \<Graphic\> | `\a` | `\b` | `\t` | `\n` | `\v` | `\f` | `\r` |`\"` | `\\` | `\ddd` | `\uxxxx`
 
-\<Letter\>       **::=**  `A` | `B` | `C` | `D` | `E` | `F` | `G` | `H` | `I` | `J` | `K` | `L` | `M` | <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;`N` | `O` | `P` | `Q` | `R` | `S` | `T` | `U` | `V` | `W` | `X` | `Y` | `Z` | <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;`a` | `b` | `c` | `d` | `e` | `f` | `g` | `h` | `i` | `j` | `k` | `l` | `m` | <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;`n` | `o` | `p` | `q` | `r` | `s` | `t` | `u` | `v` | `w` | `x` | `y` | `z` <br/>
+\<Letter\>       **::=** `A` | `B` | `C` | `D` | `E` | `F` | `G` | `H` | `I` | `J` | `K` | `L` | `M` | <br/>
+&nbsp;&nbsp;&nbsp;&nbsp; `N` | `O` | `P` | `Q` | `R` | `S` | `T` | `U` | `V` | `W` | `X` | `Y` | `Z` | <br/>
+&nbsp;&nbsp;&nbsp;&nbsp; `a` | `b` | `c` | `d` | `e` | `f` | `g` | `h` | `i` | `j` | `k` | `l` | `m` | <br/>
+&nbsp;&nbsp;&nbsp;&nbsp; `n` | `o` | `p` | `q` | `r` | `s` | `t` | `u` | `v` | `w` | `x` | `y` | `z` <br/>
 
 \<Digit\>        **::=**  `0` | `1` | `2` | `3` | `4` | `5` | `6` | `7` | `8` | `9` <br/>
 \<Op-character\> **::=**  `+` | `-` | `*` | `/` | `%` | `!` | `=`| `<`  | `>`
@@ -100,10 +99,10 @@ visible character\>
 &nbsp;&nbsp;&nbsp;&nbsp;| **return** \<Expression\> `;`<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| \<Block\><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| **if** `(` \<Expression\> `)` \<Statement-Matched\> **else** \<Statement-Matched\><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;| **while** `(` \<Expression\> `)` \<Statement-Matched<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| **while** `(` \<Expression\> `)` \<Statement-Matched\><br/>
 
 \<Statement-Unmatched\> **::=**<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;| **if** `(` \<Expression\> `)` \<Statement-Matched\> \<else\> \<Statement-Unmatched\><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| **if** `(` \<Expression\> `)` \<Statement-Matched\> **else** \<Statement-Unmatched\><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| **if** `(` \<Expression\> `)` \<Statement\><br/>
 &nbsp;&nbsp;&nbsp;&nbsp;| **while** `(` \<Expression\> `)` \<Statement-Unmatched\><br/>
 

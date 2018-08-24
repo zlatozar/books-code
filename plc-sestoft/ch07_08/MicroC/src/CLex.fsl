@@ -5,7 +5,7 @@
 module CLex
 
 open Microsoft.FSharp.Text.Lexing
-open CPar;
+open CPar
 
 let lexemeAsString lexbuf =
     LexBuffer<char>.LexemeString lexbuf
@@ -40,7 +40,7 @@ let cEscape s =
     | "\\v"  -> '\011'
     | "\\f"  -> '\012'
     | "\\r"  -> '\r'
-    | _      -> failwith "Lexer error: impossible C escape"
+    | _      -> failwith "Lexer error: impossible Micro-C escape"
 }
 
 rule Token = parse

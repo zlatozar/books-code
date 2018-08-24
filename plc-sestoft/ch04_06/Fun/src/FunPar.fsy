@@ -2,7 +2,7 @@
 
  (* Parser for micro-ML, a small functional language; one-argument functions *)
 
- open Absyn;
+ open Absyn
 
 %}
 

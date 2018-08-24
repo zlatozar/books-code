@@ -1,20 +1,18 @@
 {
- (* File Fun/Funlex.fsl 
-    Lexer for a simple functional language (micro-ML) 
-    sestoft@itu.dk * 2010-01-02
-  *)
+
+(* Lexer for a simple functional language (micro-ML) *)
 
 module FunLex
 
 open Microsoft.FSharp.Text.Lexing
-open FunPar;
+open FunPar
 
-let lexemeAsString lexbuf = 
+let lexemeAsString lexbuf =
     LexBuffer<char>.LexemeString lexbuf
 
 (* Start of outermost comment currently being scanned *)
-let commentStart = ref Position.Empty;  
- 
+let commentStart = ref Position.Empty;
+
 let commentDepth = ref 0;  (* Current comment nesting *)
 
 (* Distinguish keywords from identifiers: *)
@@ -22,7 +20,7 @@ let commentDepth = ref 0;  (* Current comment nesting *)
 let keyword s =
     match s with
     | "else"      -> ELSE
-    | "begin"     -> BEGIN        
+    | "begin"     -> BEGIN
     | "end"       -> END
     | "false"     -> CSTBOOL false
     | "if"        -> IF
@@ -43,7 +41,7 @@ let keyword s =
     | "try"       -> TRY
     | "with"      -> WITH
     | "raise"     -> RAISE
-    | "exception" -> EXN        
+    | "exception" -> EXN
     | _           -> NAME s
 }
 
@@ -54,7 +52,7 @@ rule Token = parse
   | ['a'-'z''A'-'Z']['a'-'z''A'-'Z''0'-'9''_''\'']*
                     { keyword (lexemeAsString lexbuf) }
   | "(*"            { commentStart := lexbuf.StartPos;
-                      commentDepth := 1; 
+                      commentDepth := 1;
                       SkipComment lexbuf; Token lexbuf }
   | '='             { EQ }
   | "<>"            { NE }
@@ -64,10 +62,10 @@ rule Token = parse
   | "<="            { LE }
   | "&&"            { SEQAND }
   | "||"            { SEQOR }
-  | '+'             { PLUS }                     
-  | '-'             { MINUS }                     
-  | '*'             { TIMES }                     
-  | '/'             { DIV }                     
+  | '+'             { PLUS }
+  | '-'             { MINUS }
+  | '*'             { TIMES }
+  | '/'             { DIV }
   | '%'             { MOD }
   | '('             { LPAR }
   | ')'             { RPAR }
@@ -79,12 +77,11 @@ rule Token = parse
   | _               { failwith "Lexer error: illegal symbol" }
 
 and SkipComment = parse
-    "*)"            { commentDepth := !commentDepth - 1;  
+    "*)"            { commentDepth := !commentDepth - 1;
                       if !commentDepth = 0 then ()
-                      else SkipComment lexbuf 
-                    } 
-   | "(*"           { commentDepth := !commentDepth + 1; 
+                      else SkipComment lexbuf
+                    }
+   | "(*"           { commentDepth := !commentDepth + 1;
                       SkipComment lexbuf }
    | eof            { failwith "Lexer error: unterminated comment" }
    | _              { SkipComment lexbuf }
-

@@ -9,9 +9,8 @@ open Microsoft.FSharp.Text.Lexing
 
 open Absyn
 
-(* Plain parsing from a string, with poor error reporting *)
-
-let fromString (str : string) : Expr =
+// Plain parsing from a string, with poor error reporting
+let fromString (str: string) :Expr =
     let lexbuf = LexBuffer<char>.FromString(str)
     try
       FunPar.Main FunLex.Token lexbuf
@@ -21,9 +20,8 @@ let fromString (str : string) : Expr =
                failwithf "%s near line %d, column %d\n"
                   (exn.Message) (pos.Line+1) pos.Column
 
-(* Parsing from a file *)
-
-let fromFile (filename : string) =
+// Parsing from a file
+let fromFile (filename: string) =
     use reader = new StreamReader(filename)
     let lexbuf = LexBuffer<char>.FromTextReader reader
     try
@@ -34,7 +32,8 @@ let fromFile (filename : string) =
                failwithf "%s in file %s near line %d, column %d\n"
                   (exn.Message) filename (pos.Line+1) pos.Column
 
-(* Exercise it *)
+// _____________________________________________________________________________
+//                                                                  Exercise it
 
 let e1 = fromString "5+7"
 let e2 = fromString "let f x = x + 7 in f 2 end"

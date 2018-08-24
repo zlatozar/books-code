@@ -1,20 +1,19 @@
 {
- (*
-    Lexer for a simple functional language (micro-ML)
-  *)
+ (* Lexer for a simple functional language Micro-ML *)
 
 module FunLex
 
 open Microsoft.FSharp.Text.Lexing
-open FunPar;
+open FunPar
 
 let lexemeAsString lexbuf =
     LexBuffer<char>.LexemeString lexbuf
 
 (* Start of outermost comment currently being scanned *)
-let commentStart = ref Position.Empty;
+let commentStart = ref Position.Empty
 
-let commentDepth = ref 0;  (* Current comment nesting *)
+(* Current comment nesting *)
+let commentDepth = ref 0
 
 (* Distinguish keywords from identifiers: *)
 
@@ -38,9 +37,11 @@ rule Token = parse
   | ['0'-'9']+      { CSTINT (System.Int32.Parse (lexemeAsString lexbuf)) }
   | ['a'-'z''A'-'Z']['a'-'z''A'-'Z''0'-'9']*
                     { keyword (lexemeAsString lexbuf) }
-  | "(*"            { commentStart := lexbuf.StartPos;
+  | "(*"            {
+                      commentStart := lexbuf.StartPos;
                       commentDepth := 1;
-                      SkipComment lexbuf; Token lexbuf }
+                      SkipComment lexbuf; Token lexbuf
+                    }
   | '='             { EQ }
   | "<>"            { NE }
   | '>'             { GT }
