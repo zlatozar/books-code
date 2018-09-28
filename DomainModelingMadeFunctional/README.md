@@ -23,3 +23,12 @@ https://fsharpforfunandprofit.com/posts/recipe-part3/
 https://fsharpforfunandprofit.com/posts/elevated-world/
 
 https://fsharpforfunandprofit.com/posts/serializating-your-domain-model/
+
+## Additional videos
+
+https://www.youtube.com/watch?v=vDe-4o8Uwl8
+
+## To remember
+
+**Business logic** is a pure function (detreministic)!
+No side effects - it doesn't talk to DB or web services, it doesn't throw exceptions.
