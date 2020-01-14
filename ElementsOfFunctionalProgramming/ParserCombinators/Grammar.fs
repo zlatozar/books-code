@@ -28,6 +28,7 @@ let keyword = mem ["IF"; "THEN"; "ELSE"; "ENDIF"; "WHILE"; "DO"; "END"]
 //_____________________________________________________________________________
 //                                                         Expressions grammar
 
+// '+', '/' are not defined in book
 let rec exp  s = (aexp .>>. OPTIONAL (literal ">" .>>. aexp) |>> opt_compare) s
 and aexp     s = (bexp .>>. OPTIONAL (literal "-" .>>. aexp) |>> opt_sub    ) s
 and bexp     s = (cexp .>>. OPTIONAL (literal "*" .>>. bexp) |>> opt_mul    ) s

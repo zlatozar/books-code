@@ -56,4 +56,4 @@ type Parser<'a> = {
 
 type intvalue = Intval of int
 
-type store = Store of (variable * intvalue)
+type store = Store of (variable -> intvalue)

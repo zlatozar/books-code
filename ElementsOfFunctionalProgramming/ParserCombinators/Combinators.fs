@@ -32,7 +32,7 @@ type ParserBuilder() =
 
 let parse = new ParserBuilder()
 
-/// If p1 succeeds returns the result x.
+/// Set the result of a parser to the specified value x.
 let (>>%) p1 x :Parser<'b> =
     p1 >>= (fun _ -> preturn x)
 
@@ -41,6 +41,7 @@ let (>>.) p1 p2 :Parser<'b> =
     p1 >>= (fun _ -> p2)
 
 /// Applies p1 and p2 returning the result of p1.
+/// Example: manyChars digit .>> skipChar ',' .>>. ...
 let (.>>) p1 p2 :Parser<'a> =
     p1 >>= (fun x -> p2 >>% x)
 
@@ -60,7 +61,7 @@ let (<|>) (p1: Parser<'a>) (p2: Parser<'a>) :Parser<'a> =
         | res -> res
     in p
 
-/// If p is successful applies f to the parsed element.
+/// If p is successful applies function f to the result of a parser.
 let (|>>) p f :Parser<'b> =
     p >>= (fun x -> preturn (f x))
 
@@ -71,7 +72,8 @@ let EMPTY s =
 let OPTIONAL p =
     p |>> (consonto [ ]) <|> preturn []
 
-/// Runs p as many times as posible, returning a list with the results.
+/// Runs p as many times as posible(end or fail), returning a list
+/// with the results.
 let rec MANY p :Parser<list<'a>> =
     parse {
         let! x = p
@@ -90,8 +92,8 @@ let MANY_1 p :Parser<list<'a>> =
 /// Looks for a 'front' followed by a list of 'p's separated by 'sep's
 /// and ending with a 'back'. Only the items returned by pr are kept in the result.
 let SEQ_WITH (front, sep, back) p =
-    let sep_pr = sep .>>. p           |>> snd
-    let items  = p   .>>. MANY sep_pr |>> cons
+    let sep_p = sep .>>. p          |>> snd
+    let items = p   .>>. MANY sep_p |>> cons
 
     front .>>. OPTIONAL items .>>. back |>> (link << fst << snd)
 
