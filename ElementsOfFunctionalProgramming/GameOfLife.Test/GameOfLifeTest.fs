@@ -1,9 +1,5 @@
 module GameOfLife.Test
 
-open System
-
-open NUnit.Framework
-
 open FsUnit.Xunit
 open Xunit
 

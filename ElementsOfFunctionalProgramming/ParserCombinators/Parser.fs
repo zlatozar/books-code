@@ -1,7 +1,5 @@
 module Parser
 
-open System
-
 open Base.Common
 open Base.String
 open Base.List
