@@ -26,31 +26,6 @@ type token =
     | Symbol of string
     | Number of int
 
-type input = string list
-type label = string
-type errormsg = string
-
-/// Stores information about the parser position for error messages
-type position = {
-    currentLine: string
-    line: int
-    column: int
-}
-
-//_____________________________________________________________________________
-//                                                                      Parser
-
-// Result type
-type Result<'a> =
-    | Success of 'a
-    | Failure of label * errormsg * position
-
-/// A Parser structure has a parsing function & label
-type Parser<'a> = {
-    parseFn: (input -> Result<'a * input>)
-    label:  label
-}
-
 //_____________________________________________________________________________
 //                                                                   Interpret
 

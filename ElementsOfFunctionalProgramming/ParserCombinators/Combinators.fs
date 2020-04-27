@@ -15,7 +15,7 @@ let (>>=) (p: Parser<'a>) (f: 'a -> Parser<'b>) :Parser<'b> =
     fun stream ->
         match p stream with
         | Success(x, rest) -> (f x) rest
-        | Failure -> Failure
+        | Failure          -> Failure
 
 /// Always returns a Success with x as result
 let preturn x :Parser<'a> =
@@ -28,7 +28,7 @@ let pzero :Parser<'a> =
 /// Computation expression builder.
 type ParserBuilder() =
     member __.Bind(p, f) = p >>= f
-    member __.Return(y) = preturn y
+    member __.Return(y)  = preturn y
 
 let parse = new ParserBuilder()
 
@@ -58,7 +58,7 @@ let (<|>) (p1: Parser<'a>) (p2: Parser<'a>) :Parser<'a> =
     let p stream =
         match p1 stream with
         | Failure -> p2 stream
-        | res -> res
+        | res     -> res
     in p
 
 /// If p is successful applies function f to the result of a parser.

@@ -2,13 +2,13 @@ module Base.Combinator
 
 open Base.Common
 
-/// Indentity
+/// Identity
 let I x = x
 
 /// Ignore second
 let K x _ = x
 
-/// Swap parameters
+/// Flip parameters
 let C f x y = f y x
 
 /// Double parameters

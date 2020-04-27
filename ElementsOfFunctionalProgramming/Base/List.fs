@@ -155,7 +155,7 @@ let length lst = let count n _ = n + 1
 
 let drop n = repeat tl n
 
-/// Create touple (<list with n-th elements>, <list with rest elements>)
+/// Create tuple (<list with n-th elements>, <list with rest elements>)
 let split n =
     if n < 0 then error "negative subscript error ('split' failed)"
     else

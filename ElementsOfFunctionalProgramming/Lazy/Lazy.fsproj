@@ -6,12 +6,10 @@
 
   <ItemGroup>
     <None Include="Readme.md" />
-    <Compile Include="GameOfLife.fs" />
+    <Compile Include="Lazy.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Base\Base.fsproj" />
-    <ProjectReference Include="..\CharPics\CharPics.fsproj" />
   </ItemGroup>
-
 </Project>

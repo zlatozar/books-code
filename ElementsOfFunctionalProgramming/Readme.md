@@ -1,4 +1,4 @@
 ## Book
 
 This directory contains F# code samples related to the book
-"Elements of Functional Programming" by Chris Reade
+_"Elements of Functional Programming"_ by **Chris Reade**

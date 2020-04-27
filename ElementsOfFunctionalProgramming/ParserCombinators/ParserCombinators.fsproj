@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="Readme.md" />
     <Compile Include="Types.fs" />
     <Compile Include="Combinators.fs" />
 

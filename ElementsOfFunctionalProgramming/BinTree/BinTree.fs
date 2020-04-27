@@ -13,7 +13,7 @@ with
 
 // same as ^^
 let private join ((x: 'a BinTree), (y: 'a BinTree)) =
-        Node(x, y)
+    Node(x, y)
 
 let btreeop f g =
     let rec btfg = function
