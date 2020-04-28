@@ -6,6 +6,10 @@ open Xunit
 open Lazy
 
 [<Fact>]
+let ``Check elements are equal`` () =
+    [lazy (0 + 1); lazy (0 + 2); lazy (0 + 3)] <=> [lazy (0 + 1); lazy (0 + 3); lazy (0 + 3)] |> should be False
+
+[<Fact>]
 let ``Check if leafs are equal`` () =
-    eqleaves (Leaf 6 ^^ (Leaf 3 ^^ Leaf 9)) (Leaf 6 ^^ (Leaf 3 ^^ Leaf 9))
-    |> should be True
+    eqleaves (Leaf (lazy (3 + 3)) ^^ (Leaf (lazy (1 + 2)) ^^ Leaf (lazy (6 + 3))))
+             (Leaf (lazy (2 + 3)) ^^ (Leaf (lazy (1 + 2)) ^^ Leaf (lazy (6 + 3)))) |> should be False
