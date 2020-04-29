@@ -20,6 +20,7 @@ build/
 *~
 \#*\#
 .#*
+**/.dir-locals.el
 
 # Original book files
 *.sml
