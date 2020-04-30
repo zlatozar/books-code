@@ -80,10 +80,10 @@ module LList =
 
     let (<%>) x y = revonto y (rev x)
 
-    let rec reduce f acc llst =
-        match llst with
-        | SeqEmpty      -> acc
-        | SeqCons(b, x) -> f b (reduce f acc x)
+    let rec reduce f acc sq =
+        match sq with
+        | SeqEmpty       -> acc
+        | SeqCons(x, xs) -> f x (reduce f acc xs)
 
     let (<%%>) x y = reduce cons y x
 
