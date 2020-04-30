@@ -1,7 +1,23 @@
 module Lazy
 
+#nowarn "40"
+
 // Tip: Use Seq when you want to take when it is needed.
 //      Use 'lazy' when you want to postpone execution until the very end.
+
+// Lazy is called Thunk in some languages
+
+let cond ((b, t, f): bool * (unit->'a) * (unit->'a)) :'a =
+    if b then t() else f()
+
+let rec factorial (n: int) :int =
+    cond (n <= 0, (fun () -> 1), (fun () -> n * factorial (n - 1)))
+
+let cond2 ((b, t, f): bool * 'a Lazy * 'a Lazy) :'a =
+    if b then t.Force() else f.Force()
+
+let rec factorial2 (n: int) :int =
+    cond2 (n <= 0, lazy 1, lazy (n * factorial2 (n - 1)))
 
 // Node value has lazy evaluation
 type 'a BinTree =
@@ -48,7 +64,6 @@ module LazyBinTree =
     let map f = btreeop (Leaf << f) join
 
 
-[<RequireQualifiedAccess>]
 module LList =
 
     open Base.Combinator
@@ -69,10 +84,6 @@ module LList =
     let rev llst = revonto Seq.empty llst
 
     let filter = Seq.filter
-    // let filter p =
-    //     let consifp x a =
-    //         if p a then cons a x else x
-    //     accumulate consifp Seq.empty << rev
 
     let nil = Seq.isEmpty
 
@@ -105,6 +116,7 @@ module LList =
 module Sieve =
 
     open Base.Bool
+    open LList
 
     let multipleof a b = (b % a = 0)
     let sift a x = LList.filter (non (multipleof a)) x
@@ -112,6 +124,54 @@ module Sieve =
     // fun sieve (a :: x) = a :: sieve (sift a x)
     let rec sieve sq =
         Seq.delay (fun () -> let p = Seq.head sq
-                             LList.cons p (sieve (sift p (Seq.tail sq))))
+                             cons p (sieve (sift p (Seq.tail sq))))
 
-    let primes = sieve (Seq.initInfinite (fun n -> n + 2))
+    // Seq.cache should be used to avoid recalculate values every time
+    let rec sieve2 sq =
+        Seq.cache (Seq.delay (fun () -> let p = Seq.head sq
+                                        cons p (sieve (sift p (Seq.tail sq)))))
+
+    let primes = sieve2 (Seq.initInfinite (fun n -> n + 2))
+
+module Hamming =
+
+    // How to visualize
+
+    // {1} ----∪-->--->--S₂--.---S₂----∪-->--->--S₂₃--.---S₂₃----∪-->--->--S₂₃₅--.--->S₂₃₅
+    //     /               \       /                \         /                 \
+    //     \______*2_______/       \______*3________/         \_______*5________/
+    //       ---<----<---            ---<----<---                ---<----<---
+
+    //                                                        1 --->--\
+    //                                                                 \
+    //                                       start/end  --->---> S ----::-----> S
+    // .-->-- map *2 -->------>--------\         /                      |
+    // |                             merge3 ->--/                      /   |
+    // .-->-- map *3 -->--\            /                              /    | calculate next
+    // |                 merge2 --->--/                              /     |
+    // .-->-- map *5 -->--/                                         /      V
+    //  \                                                          /
+    //   \__________<__________<__________<_________<_____________/
+
+    open Base.Int
+    open LList
+
+    let rec merge2 (xs: seq<int>) (ys: seq<int>) =
+        let (a, x) = (head xs, tail xs)
+        let (b, y) = (head ys, tail ys)
+
+        if a < b then
+            seq { yield a; yield! merge2 x ys }
+        elif a > b then
+            seq { yield b; yield! merge2 xs y }
+        else
+            seq { yield a; yield! merge2 x y }
+
+    let merge3 (x, y, z) = merge2 x (merge2 y z)
+
+    let rec hamming :seq<int> = seq {
+        yield 1
+        yield! merge3 (map (times 2) hamming,
+                       map (times 3) hamming,
+                       map (times 5) hamming)
+    }
