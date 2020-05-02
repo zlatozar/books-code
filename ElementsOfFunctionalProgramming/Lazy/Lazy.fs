@@ -1,6 +1,6 @@
 module Lazy
 
-#nowarn "40"
+#nowarn "40" // recursive initialization
 
 // Tip: Use Seq when you want to take when it is needed.
 //      Use 'lazy' when you want to postpone execution until the very end.
@@ -173,5 +173,83 @@ module Hamming =
         yield 1
         yield! merge3 (map (times 2) hamming,
                        map (times 3) hamming,
+
+
                        map (times 5) hamming)
     }
+
+module IO =
+
+    type input = char list list
+    type output = char list list
+
+    type interaction<'a, 'b> = (input * 'a) -> (input * 'b * output)
+
+    let (<@>) (inter1: interaction<'a, 'b>) (inter2: interaction<'b, 'y>) (input, a) =
+        let (in1, b, outl) = inter1 (input, a)
+        let (in2, c, out2) = inter2 (in1, b)
+
+        (in2, c, outl @ out2)
+
+    let alt (p: 'a -> bool) (inter1: interaction<'a, 'b>) (inter2: interaction<'a, 'b>) (input, a) =
+        if p a then inter1 (input, a) else inter2 (input, a)
+
+    let private checkflag (inter: interaction<'a, 'a>) (input, (a, b)) =
+        if b then (input, a, [ ])
+        else inter (input, a)
+
+    let rec repeated inter =
+        inter <@> checkflag (repeated inter)
+
+module LDict =
+
+    open Base.Common
+    open FSharpx.Collections
+
+    type key = int
+
+    // Note that there is two dictionaries in Item
+    type 'a dict =
+        | Empty
+        | Item of (key * 'a * 'a dict * 'a dict)
+
+    type 'a dictrequest =
+        | Entry of (key * 'a)
+        | Lookup of key
+
+    /// Build balanced tree - (node, left(smaller), right(larger))
+    /// Access is available while the dictionary is being built.
+    let rec builddict llst =
+        match llst with
+        | LazyList.Nil                   -> Empty
+        | LazyList.Cons ((k1, a1), rest) -> let smaller (k, _) = k < k1
+                                            let larger (k, _) = k > k1
+                                            Item (k1, a1, builddict (LazyList.filter smaller rest),
+                                                          builddict (LazyList.filter larger rest))
+
+    // Taking particular type we split the stream
+
+    let rec getlooks req =
+        match req with
+        | LazyList.Cons (Lookup k, rest) -> LazyList.consDelayed k (fun () -> getlooks rest)
+        | LazyList.Cons (Entry _, rest)  -> getlooks rest
+        | _                              -> LazyList.empty
+
+    let rec getentries req =
+        match req with
+        | LazyList.Cons (Lookup _, rest)     -> getentries rest
+        | LazyList.Cons (Entry (k, v), rest) -> LazyList.consDelayed (k, v) (fun () -> getentries rest)
+        | _                                  -> LazyList.empty
+
+    let rec lookup dict k' =
+        match dict with
+        | Empty _             -> error "not found in dictionary"
+        | Item (k, a, d1, d2) -> if k = k' then a
+                                    else if k > k' then lookup d1 k'
+                                         else lookup d2 k'
+
+    // 'builddict' -  access is available while the dictionary is being built.
+    // otherwise 'map lookup' should wait until build finish.
+    let dictprocess requests =
+        let finaldict = builddict (getentries requests)
+        LazyList.map (lookup finaldict) (getlooks requests)
