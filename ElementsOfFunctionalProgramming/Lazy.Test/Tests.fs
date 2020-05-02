@@ -36,13 +36,14 @@ let ``Check Hamming numbers algorithm`` () =
     Seq.item 30 hamming |> should equal 81
 
 open LDict
+open FSharpx.Collections
 
 [<Fact>]
 let ``Check processing`` () =
-    let requests = [Lookup 3; Entry (1, "x"); Entry (3, "z"); Lookup 1;
+    let requests = LazyList.ofList [Lookup 3; Entry (1, "x"); Entry (3, "z"); Lookup 1;
                     Lookup 2; Entry (2, "y")]
-    dictprocess requests |> should equal ["z"; "x"; "y"]
+    dictprocess requests |> LazyList.toList |> should equal ["z"; "x"; "y"]
 
 let ``Ordered tree shoudl be builded`` () =
-    builddict [(1, "x"); (3, "z"); (2, "y")]
+    builddict (LazyList.ofList [(1, "x"); (3, "z"); (2, "y")])
     |> should equal (Item (1, "x", Empty, Item (3, "z", Item (2, "y", Empty, Empty), Empty)))

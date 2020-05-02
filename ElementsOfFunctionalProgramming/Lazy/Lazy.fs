@@ -173,31 +173,36 @@ module Hamming =
         yield 1
         yield! merge3 (map (times 2) hamming,
                        map (times 3) hamming,
-
-
                        map (times 5) hamming)
     }
 
 module IO =
 
-    type input = char list list
-    type output = char list list
+    open FSharpx.Collections
+
+    type input = char LazyList LazyList
+    type output = char LazyList LazyList
 
     type interaction<'a, 'b> = (input * 'a) -> (input * 'b * output)
 
-    let (<@>) (inter1: interaction<'a, 'b>) (inter2: interaction<'b, 'y>) (input, a) =
-        let (in1, b, outl) = inter1 (input, a)
+    // Note: To combine parts in various ways we need to be Turing complete
+
+    // 1. Assignment
+    let (<@>) (inter1: interaction<'a, 'b>) (inter2: interaction<'b, 'y>) (input: input, a) =
+        let (in1, b, out1) = inter1 (input, a)
         let (in2, c, out2) = inter2 (in1, b)
 
-        (in2, c, outl @ out2)
+        (in2, c, LazyList.append out1 out2)
 
+    // 2. Conditional
     let alt (p: 'a -> bool) (inter1: interaction<'a, 'b>) (inter2: interaction<'a, 'b>) (input, a) =
         if p a then inter1 (input, a) else inter2 (input, a)
 
     let private checkflag (inter: interaction<'a, 'a>) (input, (a, b)) =
-        if b then (input, a, [ ])
+        if b then (input, a, LazyList.empty)
         else inter (input, a)
 
+    // 3. Looping
     let rec repeated inter =
         inter <@> checkflag (repeated inter)
 
@@ -248,7 +253,7 @@ module LDict =
                                     else if k > k' then lookup d1 k'
                                          else lookup d2 k'
 
-    // 'builddict' -  access is available while the dictionary is being built.
+    // 'builddict' - access is available while the dictionary is being built.
     // otherwise 'map lookup' should wait until build finish.
     let dictprocess requests =
         let finaldict = builddict (getentries requests)
