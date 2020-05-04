@@ -1,6 +1,6 @@
 module Lazy
 
-#nowarn "40" // recursive initialization
+#nowarn "40" // recursive initialization in 'hamming'
 
 // Tip: Use Seq when you want to take when it is needed.
 //      Use 'lazy' when you want to postpone execution until the very end.

@@ -5,11 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Eager.fs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Base\Base.fsproj" />
+    <Compile Include="IOMonad.fs" />
+    <Compile Include="IOMonad2.fs" />
+    <Compile Include="MaybeIOMonad.fs" />
   </ItemGroup>
 
 </Project>
