@@ -7,7 +7,7 @@ type IO<'a> =
 
 let rec run x =
     match x with
-    | Return v -> v()
+    | Return v  -> v()
     | Suspend s -> s() |> run
 
 [<RequireQualifiedAccess>]
