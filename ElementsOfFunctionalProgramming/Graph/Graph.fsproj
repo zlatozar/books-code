@@ -6,9 +6,11 @@
 
   <ItemGroup>
     <None Include="Notes.md" />
-    <Compile Include="IOMonad.fs" />
-    <Compile Include="IOMonad2.fs" />
-    <Compile Include="MaybeIOMonad.fs" />
+    <Compile Include="Graph.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Base\Base.fsproj" />
   </ItemGroup>
 
 </Project>

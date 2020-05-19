@@ -8,7 +8,7 @@ let I x = x
 /// Ignore second
 let K x _ = x
 
-/// Flip parameters
+/// Flip parameters. (aka 'flip')
 let C f x y = f y x
 
 /// Double parameters

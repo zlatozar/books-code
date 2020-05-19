@@ -4,6 +4,11 @@ open Base.String
 open Base.List
 open CharPics
 
+// Tip: We have now seen enough examples to get the general idea: when introducing
+//      a new datatype, also define the generic 'fold' operation for that datatype. When
+//      the datatype is parameterised, also introduce the appropriate 'mapping' operation.
+//      Given these functions, a number of other useful functions can be quickly defined.
+
 type 'a BinTree =
     | Leaf of 'a
     | Node of 'a BinTree * 'a BinTree

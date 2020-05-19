@@ -42,6 +42,8 @@ such as `let x <- m in n` (`m >>= fun (x) -> n`)
 `let x=m in x` <=> `m`
 `let y=(let x=m in n) in o` <=> `let x=m in (let y=n in o)`
 
+**Monad is what take care of side effects automatically when you compose functions.**
+
 ## Example
 
 How to convert sorting to monadic function.

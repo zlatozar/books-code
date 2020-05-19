@@ -5,6 +5,8 @@ open Base.Combinator
 open Base.Bool
 open Base.Int
 
+// The datatype of lists is the workhorse of functional programming.
+
 /// Assosiative list implementation.
 let assoc newassocs assocf arg =
     let rec search lst =
@@ -30,7 +32,8 @@ let fold f =
 
 let accumulate = fold
 
-// revert list argument so revert and function arguments
+// Revert list argument so revert and function arguments.
+// See fold 'duality theorem': foldr f e xs = foldl (flip f) e (reverse xs)
 let foldRight f a x =
     accumulate (C f) a (rev x)
 
@@ -90,11 +93,17 @@ let tl = function
     | _::x -> x
     | []   -> error "'tl' of [] is undefined"
 
+// Note: One small advantage of the switch of arguments
+//       is that some functions can be defined more succinctly;
+
 /// Concatenate 'a' in front of list 'lst'. Prefer prefix notation.
 let cons a lst = a::lst
 
 /// Use when you need to 'cons' but parameters are reverted
 let consonto lst a = C cons lst a
+
+// See 'fold map fusion'
+let map' g = foldRight (cons << g) []
 
 /// Append two lists. Prefer prefix notation.
 let append x y = x @ y
@@ -177,6 +186,14 @@ let select n = hd << (drop (n - 1))
 
 /// Select 'm' elements starting from n-th element(including).
 let sublist n m x = front m (drop (n - 1) x)
+
+/// Select element from list with a given index
+/// e.g. [0; 1; 2]<!>1
+let rec (<!>) lst n =
+    match lst, n with
+    | (x::_, n) when n = 0 -> x
+    | (_::xs, n)           -> xs <!> n
+    | ([], _)              -> error "out of bound"
 
 /// Generates all permutations of a given list.
 let rec perms = function
