@@ -7,6 +7,7 @@
   Note that `|>` operator is more common - data could be send. `>>` only for function composition.
 
 - `List.scan` and `List.scanBack` are analog of Haskell's `scanl/scanr`.
+
 ## Functions design
 
 In computing, a _specification_(function type) is a description of what task a
@@ -89,3 +90,48 @@ let assoc newassocs oldassocs arg =
 
 In functional programming the universe of values is partitioned into
 organised collections, called _types_
+
+### How to convert function to be tail recursive
+
+If there is a action after recursion it is not trivial to make function tail
+recursive. For example if you want to partition a list using given predicate.
+First contain elements that meet the test in the second rest.
+
+Direct solution is to divide list recursively and then start splicing.
+
+```fsharp
+let rec partition p lst =
+    match lst with
+    | []    -> ([], [])
+    | x::xs -> let (ys, zs) = partition p xs
+               if p x then (x::ys, zs)
+               else (ys, x::zs)
+```
+
+Very interesting is how identity function/combinator (`let I x = x` could be
+used. Could be used as **initial value** of a functions. In other words treat it
+as `[]` of a list.
+
+The idea is following: recur on rest (xs) and the continuation function that deals with
+partial result.
+
+```fsharp
+let partition pred lst =
+    let rec loop l cont =
+        match l with
+        | []                -> cont ([], [])
+        | x::xs when pred x -> loop xs (fun (ys, zs) -> cont (x::ys, zs))
+        | x::xs             -> loop xs (fun (ys, zs) -> cont (ys, x::zs))
+    loop lst I
+```
+
+Now it is very easy to convert following:
+
+```fsharp
+let rec span p lst =
+    match lst with
+    | []    -> ([], [])
+    | x::xs -> let (ys, zs) = span p xs
+               if p x then (x::ys, zs)
+               else ([], x::xs)
+```

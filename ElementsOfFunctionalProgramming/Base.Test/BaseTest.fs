@@ -102,3 +102,13 @@ let ``Test 'split' function`` () =
 [<Fact>]
 let ``Test 'sublist' function`` () =
     sublist 2 3 [1; 2; 3; 5] |> should equal [2; 3; 5]
+
+[<Fact>]
+let ``Test 'partition' function`` () =
+    partition (fun x -> x > 0) [-1; -2; 1; 2]
+    |> should equal ([1; 2], [-1; -2])
+
+[<Fact>]
+let ``Test 'span' function`` () =
+    span (fun x -> x < 0) [-1; -2; 1; 2]
+    |> should equal ([-1; -2], [1; 2])

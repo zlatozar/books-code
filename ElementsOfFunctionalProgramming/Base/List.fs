@@ -33,7 +33,7 @@ let fold f =
 let accumulate = fold
 
 // Revert list argument so revert and function arguments.
-// See fold 'duality theorem': foldr f e xs = foldl (flip f) e (reverse xs)
+// See fold 'duality theorem': foldr f e xs <=> foldl (flip f) e (reverse xs)
 let foldRight f a x =
     accumulate (C f) a (rev x)
 
@@ -99,7 +99,7 @@ let tl = function
 /// Concatenate 'a' in front of list 'lst'. Prefer prefix notation.
 let cons a lst = a::lst
 
-/// Use when you need to 'cons' but parameters are reverted
+/// Use when you need to 'cons' but parameters are reverted (aka 'snoc')
 let consonto lst a = C cons lst a
 
 // See 'fold map fusion'
@@ -207,3 +207,20 @@ and (--) lst elm =
     | [], _       -> []
     | (b :: x), a -> if a = b then x
                      else b :: (x--a)
+
+/// Partitions a list ([true], [false]) according to a given predicate
+let partition pred lst =
+    let rec loop l cont =
+        match l with
+        | []                -> cont ([], [])
+        | x::xs when pred x -> loop xs (fun (ys, zs) -> cont (x::ys, zs))
+        | x::xs             -> loop xs (fun (ys, zs) -> cont (ys, x::zs))
+    loop lst I
+
+let span pred lst =
+    let rec loop l cont =
+        match l with
+        | []                -> cont ([], [])
+        | x::xs when pred x -> loop xs (fun (ys, zs) -> cont (x::ys, zs))
+        | x::xs             -> loop xs (fun (_, _) -> cont ([], x::xs))
+    loop lst I

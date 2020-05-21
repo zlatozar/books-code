@@ -2,7 +2,7 @@ module Base.Combinator
 
 open Base.Common
 
-/// Identity
+/// Identity. Could be treated same as [] for lists.
 let I x = x
 
 /// Ignore second
