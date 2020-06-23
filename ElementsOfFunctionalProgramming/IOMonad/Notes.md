@@ -10,7 +10,7 @@ Monad Name  | Description
 `Reader`    | Computations which read from a shared environment
 `Writer`    | Computations which write data in addition to computing values
 `Continuation` | Computations which can be interrupted and restarted
-                 (captures the core of how asynchronous workflows work)
+               | (captures the core of how asynchronous workflows work)
                |
 
 **Continuations are the heart of monads implementation!**
@@ -38,9 +38,9 @@ such as `let x <- m in n` (`m >>= fun (x) -> n`)
 
 ## Monad laws
 
-`let x=v in m` <=> `m[x:=v]`
-`let x=m in x` <=> `m`
-`let y=(let x=m in n) in o` <=> `let x=m in (let y=n in o)`
+`let x=v in m` <=> `m[x:=v]` <br/>
+`let x=m in x` <=> `m`       <br/>
+`let y=(let x=m in n) in o` <=> `let x=m in (let y=n in o)` <br/>
 
 **Monad is what take care of side effects automatically when you compose functions.**
 
