@@ -50,7 +50,7 @@ let exists p l =
                   else existsp x
     existsp l
 ```
-better remove `l` it is redundunt
+better remove `l` it is redundant
 
 ```fsharp
 let exists p =
@@ -108,11 +108,11 @@ let rec partition p lst =
                else (ys, x::zs)
 ```
 
-Very interesting is how identity function/combinator (`let I x = x` could be
-used. Could be used as **initial value** of a functions. In other words treat it
+Very interesting is how identity function/combinator (`let I x = x`) could be
+used. It is an **initial value** of a functions. In other words could be treated
 as `[]` of a list.
 
-The idea is following: recur on rest (xs) and the continuation function that deals with
+The idea is following: recur on rest (xs) and the continuation function chain that deals with
 partial result.
 
 ```fsharp
@@ -135,3 +135,11 @@ let rec span p lst =
                if p x then (x::ys, zs)
                else ([], x::xs)
 ```
+
+Tip: Every recursion could be replaced by `fold`/`foldBack`!
+
+## Input
+
+Input is one by one passed elements. One way to organize algorithms/structures is
+function's logic to define how to search next element that should be process and
+second one to know at advance what "kind" is the next element (e.g. heaps).

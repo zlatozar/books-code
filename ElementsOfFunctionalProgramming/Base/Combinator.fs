@@ -8,6 +8,9 @@ let I x = x
 /// Ignore second
 let K x _ = x
 
+/// Lifted application
+let S f g x = f x (g x)
+
 /// Flip parameters. (aka 'flip')
 let C f x y = f y x
 
@@ -27,7 +30,7 @@ let W f x = f x x
 /// (In a typed language like F#, fix has to be defined recursively.
 /// However, in an untyped system, such as the pure lambda calculus,
 /// fix can be defined without recursion. That version of fix is
-/// called the "Y" combinator.)
+/// called the Y-combinator.)
 let rec Y f =
     let z x = (f (Y f)) x
     z
@@ -38,6 +41,8 @@ let uncurry f (a, b) = f a b
 
 let pair a b = (a, b)
 
+// Tip: Glue together thing that can't be compose.
+//      In other words 'f' and 'g' are from same domain but have different ranges.
 let couple f g x = (f x, g x)
 
 /// FOR times DO <function> params => repeat <function> times params

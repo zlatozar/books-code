@@ -124,6 +124,8 @@ let reverse lst = revonto [] lst
 /// Flatten nested lists e.g [[1; 2]; [3; 4]] -> [1; 2; 3; 4]
 let link llst = rev (accumulate revonto [] llst)
 
+// Tip: 'linkwith' is the working horse for list printing :)
+
 /// Execute given fuction and the results are in following format
 /// [ [<front>] [function result1] [<sep>]....[function resultN] [<back>] ]
 let linkwith (front, sep, back) llst =
@@ -132,7 +134,7 @@ let linkwith (front, sep, back) llst =
         | []   -> [back]
         | [a]  -> [a; back]
         | a::x -> a::sep::(f x)
-    link (front::(f llst))
+    link front::(f llst)
 
 /// Create a list with pairs using given lists with equal size.
 let pairlists x y = zip pair x y

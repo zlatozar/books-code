@@ -1,7 +1,9 @@
 module Base.Int
 
+let succ x = x + 1
+
 // Sometimes it is useful to use prefix notation
-// for algebric funtions
+// for algebraic functions
 
 let plus (a: int) b =
     a + b
