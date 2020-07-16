@@ -8,6 +8,8 @@
 
 - `List.scan` and `List.scanBack` are analog of Haskell's `scanl/scanr`.
 
+- `yield` - Instead of returning a value (but suspends the function), you generate a series of values.
+
 ## Functions design
 
 In computing, a _specification_(function type) is a description of what task a
