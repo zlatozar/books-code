@@ -121,7 +121,7 @@ let bail = [(0, 0); (0, 1); (1, 0); (1, 1)]
 let barberpole n =
     let rec loop i =
         if i = n then
-            (n + n - 1, n + n)::(n + n, n + n)::[]
+            (n + n - 1, n + n)::[(n + n, n + n)]
         else
             (i + i, i + i + 1)::(i + i + 2, i + i + 1)::(loop (i + 1))
     (0, 0)::(1, 0)::(loop 0)

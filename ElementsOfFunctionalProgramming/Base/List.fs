@@ -134,7 +134,7 @@ let linkwith (front, sep, back) llst =
         | []   -> [back]
         | [a]  -> [a; back]
         | a::x -> a::sep::(f x)
-    link front::(f llst)
+    link (front::(f llst))
 
 /// Create a list with pairs using given lists with equal size.
 let pairlists x y = zip pair x y

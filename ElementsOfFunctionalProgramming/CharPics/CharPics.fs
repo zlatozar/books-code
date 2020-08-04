@@ -59,7 +59,7 @@ let rowwith fsb piclist =
     let mkline n = stringwith fsb (map (select n) blocks)
     let sl' = map mkline (1 |> upto <| d')
     let w' = if nil sl' then 0
-             else size (hd sl') // lenth - 1
+             else size (hd sl') // length - 1
 
     Pic(d', w', sl')
 

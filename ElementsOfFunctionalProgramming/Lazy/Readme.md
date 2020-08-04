@@ -1,6 +1,6 @@
 ## F# notes
 
-- Prefer LazyList over Sequence, because of pattern matching and automatic caching
+- Prefer **LazyList** over **Sequence**, because of pattern matching and automatic caching
 
 ## When to use lazy programming?
 

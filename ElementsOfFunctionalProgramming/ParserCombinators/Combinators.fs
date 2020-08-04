@@ -30,7 +30,7 @@ type ParserBuilder() =
     member __.Bind(p, f) = p >>= f
     member __.Return(y)  = preturn y
 
-let parse = new ParserBuilder()
+let parse = ParserBuilder()
 
 /// Set the result of a parser to the specified value x.
 let (>>%) p1 x :Parser<'b> =
@@ -63,7 +63,8 @@ let (<|>) (p1: Parser<'a>) (p2: Parser<'a>) :Parser<'a> =
 
 /// If p is successful applies function f to the result of a parser.
 let (|>>) p f :Parser<'b> =
-    p >>= (fun x -> preturn (f x))
+    // p >>= (fun x -> preturn (f x))
+    p >>= (preturn << f)
 
 let EMPTY s =
     Success ([ ], s)
@@ -109,7 +110,8 @@ let rec TIMES n p :Parser<list<'a>> =
 
 /// Returns the first successful result of the given parser sequence.
 let CHOICE ps :Parser<'a> =
-    Seq.reduce (fun (p1: Parser<'a>) (p2: Parser<'a>) -> p1 <|> p2) ps
+    // Seq.reduce (fun (p1: Parser<'a>) (p2: Parser<'a>) -> p1 <|> p2) ps
+    Seq.reduce (<|>) ps
 
 //_____________________________________________________________________________
 //
