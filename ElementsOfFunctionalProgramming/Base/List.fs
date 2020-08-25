@@ -7,7 +7,7 @@ open Base.Int
 
 // The datatype of lists is the workhorse of functional programming.
 
-/// Assosiative list implementation.
+/// Associative list implementation.
 let assoc newassocs assocf arg =
     let rec search lst =
         match lst with
@@ -226,3 +226,20 @@ let span pred lst =
         | x::xs when pred x -> loop xs (fun (ys, zs) -> cont (x::ys, zs))
         | x::xs             -> loop xs (fun (_, _) -> cont ([], x::xs))
     loop lst I
+
+let mergeSorted less lst1 lst2 =
+    let rec merge (l1, l2) =
+        match (l1, l2) with
+        | ([], x) | (x, []) -> x
+        | (x::xs, y::ys)    -> if less x y then x::merge(xs, y::ys)
+                               else y::merge(ys, x::xs)
+    merge (lst1, lst2)
+
+// First two are the first elements of the lists
+let divide lst =
+    let rec loop (p, q, r) =
+        match (p, q, r) with
+        | (p, q, [])         -> (p, q)
+        | (p, q, [a])        -> (a::p, q)
+        | (p, q, a::b::rest) -> loop (a::p, b::q, rest)
+    loop ([], [], lst)

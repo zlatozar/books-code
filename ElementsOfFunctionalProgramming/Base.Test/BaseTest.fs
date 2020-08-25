@@ -112,3 +112,13 @@ let ``Test 'partition' function`` () =
 let ``Test 'span' function`` () =
     span (fun x -> x < 0) [-1; -2; 1; 2]
     |> should equal ([-1; -2], [1; 2])
+
+[<Fact>]
+let ``Test 'mergeSorted' function`` () =
+    mergeSorted (<) [1; 2; 3; 4] [6; 7; 8]
+    |> should equal [1; 2; 3; 4; 6; 7; 8]
+
+[<Fact>]
+let ``Test 'divide' function`` () =
+    divide [1; 2; 3; 4; 5]
+    |> should equal ([5; 3; 1], [4; 2])
