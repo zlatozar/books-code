@@ -38,5 +38,5 @@ https://www.youtube.com/watch?v=KkzvQSuYd5I
 
 ## To remember
 
-**Business logic** is a pure function (deterministic)!
+**Business/Domain logic** is a pure function (deterministic)!
 No side effects - it doesn't talk to DB or web services, it doesn't throw exceptions.

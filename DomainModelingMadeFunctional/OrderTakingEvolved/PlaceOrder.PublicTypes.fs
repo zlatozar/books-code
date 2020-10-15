@@ -8,14 +8,14 @@ open OrderTaking.Common
 // THE SAME AS PREVIOUS VERSION only State and Country is added
 
 // This file contains the definitions of PUBLIC types (exposed at the boundary of the bounded context)
-// related to the PlaceOrder workflow 
+// related to the PlaceOrder workflow
 
 // ==================================
 // PlaceOrder workflow types
 // ==================================
 
-//_________________________________________________________________________
-//            Types                                 Inputs to the workflow
+// _________________________________________________________________________
+//             Types                                 Inputs to the workflow
 
 type UnvalidatedCustomerInfo = {
     FirstName : string
@@ -49,16 +49,16 @@ type UnvalidatedOrder = {
     Lines : UnvalidatedOrderLine list
     PromotionCode : string
     }
-    
-//_________________________________________________________________________
-//            Types               Outputs from the workflow (success case)
+
+// _________________________________________________________________________
+//             Types               Outputs from the workflow (success case)
 
 /// Event will be created if the Acknowledgment was successfully posted
 type OrderAcknowledgmentSent = {
     OrderId : OrderId
-    EmailAddress : EmailAddress 
+    EmailAddress : EmailAddress
     }
-    
+
 /// Event to send to shipping context
 type OrderPlaced = PricedOrder
 
@@ -84,13 +84,13 @@ type BillableOrderPlaced = {
 
 /// The possible events resulting from the PlaceOrder workflow
 /// Not all events will occur, depending on the logic of the workflow
-type PlaceOrderEvent = 
-    | ShippableOrderPlaced of ShippableOrderPlaced 
-    | BillableOrderPlaced of BillableOrderPlaced 
+type PlaceOrderEvent =
+    | ShippableOrderPlaced of ShippableOrderPlaced
+    | BillableOrderPlaced of BillableOrderPlaced
     | AcknowledgmentSent  of OrderAcknowledgmentSent
-    
-//_________________________________________________________________________
-//            Types                                          Error outputs 
+
+// _________________________________________________________________________
+//             Types                                          Error outputs
 
 /// All the things that can go wrong in this workflow
 type ValidationError = ValidationError of string
@@ -103,17 +103,17 @@ type ServiceInfo = {
     }
 
 type RemoteServiceError = {
-    Service : ServiceInfo 
+    Service : ServiceInfo
     Exception : System.Exception
     }
 
 type PlaceOrderError =
-    | Validation of ValidationError 
-    | Pricing of PricingError 
-    | RemoteService of RemoteServiceError 
+    | Validation of ValidationError
+    | Pricing of PricingError
+    | RemoteService of RemoteServiceError
 
-//_________________________________________________________________________
-//            Types                                    The workflow itself
+// _________________________________________________________________________
+//             Types                                    The workflow itself
 
-type PlaceOrder = 
+type PlaceOrder =
     UnvalidatedOrder -> AsyncResult<PlaceOrderEvent list,PlaceOrderError>

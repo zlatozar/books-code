@@ -1,7 +1,7 @@
 ﻿// We are defining types and submodules, so we can use a namespace
 // rather than a module at the top level
 
-namespace OrderTaking.Common  
+namespace OrderTaking.Common
 
 // THE SAME AS PREVIOUS VERSION only few fields are added
 
@@ -16,11 +16,11 @@ type PersonalName = {
     FirstName : String50
     LastName : String50
     }
-    
+
 type CustomerInfo = {
-    Name : PersonalName 
-    EmailAddress : EmailAddress 
-    VipStatus : VipStatus 
+    Name : PersonalName
+    EmailAddress : EmailAddress
+    VipStatus : VipStatus
     }
 
 // ==================================
@@ -45,5 +45,3 @@ type Address = {
 // Note that the definition of a Product is in a different bounded
 // context, and in this context, products are only represented by a ProductCode
 // (see the SimpleTypes module).
-
-
