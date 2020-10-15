@@ -1,37 +1,43 @@
 ## Generic project structure in F#
 
 ```
--- Common
-      |_src
-      |  |_ test
-      |       |_ ProgramTest.fs
+-- XXXTypes (e.g. DomainTypes)
+   // Contains types that are spread among multiple modules
+
+-- Example
+      |_ lib
+      |   |
+      |   |_Example.FirstModule.fs
+      |       namespace Exmple
       |
-      |_ Core
-      |    |_ test
-      |    |    |_ FileTest.fs
-      |    |
-      |    |_ File.fs
-      |           module ModuleName
+      |       // declare all needed types
       |
-      |           // declare all needed types
+      |       module FirstModule =
+      |         // open all needed dependencies
+      |         // define all operations on declared types
+      |   ...
+      |   |
+      |   |_Example.LastModule.fs
+            // every module in a separate file
       |
-      |           [<RequireQualifiedAccess>]
-      |           module ModuleName
-      |               // define all operations
+      |_ Example.Implemenation.fs
+      |  // main logic of that module
       |
-      |_ SomeOtherModule
-      |
-      |_ Program.fs
+      |_ Readme.md
       |
       |_ Makefile
            build:
            test:
            repl:
 
+-- Example.Test
+
 -- Library1
 ....
 -- LibraryN
--- MainProject
+
+-- Implementation.Types
+-- Implementation (main functionality)
 
 -- Project.sln
 -- Readme.md
