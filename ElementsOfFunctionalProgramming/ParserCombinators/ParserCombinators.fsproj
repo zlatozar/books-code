@@ -13,6 +13,7 @@
     <Compile Include="Lexer.fs" />
     <Compile Include="Parser.fs" />
     <Compile Include="Interpret.fs" />
+    <None Include="Notes.md" />
   </ItemGroup>
 
   <ItemGroup>
