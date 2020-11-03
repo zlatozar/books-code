@@ -39,4 +39,5 @@ https://www.youtube.com/watch?v=KkzvQSuYd5I
 ## To remember
 
 **Business/Domain logic** is a pure function (deterministic)!
-No side effects - it doesn't talk to DB or web services, it doesn't throw exceptions.
+No side effects - it doesn't depend from DB or web services(infrastructure),
+it doesn't throw exceptions and doesn't contain async code.
