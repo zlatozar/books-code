@@ -5,6 +5,11 @@ proj1/nachos
 proj2/nachos
 proj3/nachos
 
+*.coff
+libnachos.a
+*.o
+
+
 #_______________________________________________________________________________
 #                                                               Compiled source
 
