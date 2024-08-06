@@ -8,3 +8,4 @@ Clone this repo into your `~/quicklisp/` folder, then run `(ql:quickload :study-
 
 ### Links
 - [Hello, Declarative World](https://www.infoq.com/presentations/declarative-programming/)
+- [Hello, Declarative World (impl.)](https://github.com/jcoglan/kanrens/tree/master)
